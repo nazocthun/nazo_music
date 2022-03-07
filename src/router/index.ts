@@ -1,12 +1,30 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Index from '@/views/Index.vue'
+import SongLists from '@/views/SongLists.vue'
+import NewMusic from '@/views/NewMusic.vue'
+import MusicVideo from '@/views/MusicVideo.vue'
 
 const routes: Array<RouteRecordRaw> = [
-  // {
-  //   path: '/',
-  //   name: 'home',
-  //   component: HomeView
-  // },
+  {
+    path: '/',
+    name: 'index',
+    component: Index
+  },
+  {
+    path: '/songlists',
+    name: 'songlists',
+    component: SongLists
+  },
+  {
+    path: '/newmusic',
+    name: 'newmusic',
+    component: NewMusic
+  },
+  {
+    path: '/musicvideo',
+    name: 'musicvideo',
+    component: MusicVideo
+  },
   // {
   //   path: '/about',
   //   name: 'about',

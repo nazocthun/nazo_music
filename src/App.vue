@@ -1,31 +1,21 @@
 <template>
   <el-container direction="vertical">
-    <el-row :span="24">
-      <el-col :span="24">
-        <pageheader></pageheader>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="24">
-        <mainpage class="mainpage"></mainpage>
-      </el-col>
-    </el-row>
-
-  
-    <pagefooter class="footer"></pagefooter>
+    <PageHeader></PageHeader>
+    <MainPage class="mainpage"></MainPage>
+    <PageFooter class="footer"></PageFooter>
   </el-container>
 </template>
 
-<script>
-import pageheader from './views/Header.vue';
-import mainpage from './views/MainPage.vue';
-import pagefooter from './views/Footer.vue';
+<script lang="ts">
+import PageHeader from './components/index/Header.vue';
+import MainPage from './components/index/MainPage.vue';
+import PageFooter from './components/index/Footer.vue';
 export default {
   name: 'NazoMusicApp',
   components: {
-    pageheader,
-    mainpage,
-    pagefooter,
+    PageHeader,
+    MainPage,
+    PageFooter,
   },
   data() {
     return {
@@ -44,24 +34,35 @@ export default {
 </script>
 
 <style lang="scss">
+#app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+html, body{
+  margin:0;
+  height:100%;
+}
+
 .header {
   position: relative;
-  background-color: #b3c0d1;
-  color: var(--el-text-color-primary);
-  width: 100%;
-  height: 50px;
+  align-items: center;
+  background-color: rgb(240, 214, 214);
+  padding: 0 30px;
 }
+
 .mainpage{
-  background-color: #b3c0d1;
-  height: 70%;
-  position: sticky;
-  bottom: 0;
+  position: fixed;
+  top: 60px;
+  bottom: 60px;
+  width: 100%;
 }
 .footer{
-  position: absolute;
+  position: fixed;
   bottom: 0;
   background-color: #b3c0d1;
-  height: 10%;
+  height: 60px;
   width: 100%;
 }
 </style>

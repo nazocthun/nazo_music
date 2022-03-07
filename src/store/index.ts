@@ -1,14 +1,20 @@
-import { createStore } from 'vuex'
+import Vuex, { StoreOptions } from 'vuex'
+import { RootState } from './types'
+import mutations from './mutations'
 
-export default createStore({
+const store: StoreOptions<RootState> = {
   state: {
+    globalMusicUrl:"",
+    globalMusicInfo:{},
+    globalCurrentTime:0,
+    isMusicPaused:true,
+    musicQueue:[],
+    nowIndex:0,
+    deleteToNext:false,
+    queuePos:{},
+    queueStyle:'normal',
   },
-  getters: {
-  },
-  mutations: {
-  },
-  actions: {
-  },
-  modules: {
-  }
-})
+  mutations
+}
+
+export default new Vuex.Store<RootState>(store)

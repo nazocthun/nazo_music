@@ -1,20 +1,20 @@
-import { MutationTree } from "node_modules.nosync/vuex/types"
+import { MutationTree } from "node_modules/vuex/types"
 import { RootState } from "./types"
 
 const mutations: MutationTree<RootState> = {
-  changeMusicUrl(state, url: string){
+  changeMusicUrl(state: RootState, url: string){
     state.globalMusicUrl = url
   },
-  changeMusicInfo(state, info){
+  changeMusicInfo(state: RootState, info: any){
     state.globalMusicInfo = info
   },
-  changeCurrentTime(state, time){
+  changeCurrentTime(state: RootState, time: any){
     state.globalCurrentTime = time
   },
-  changeMusicStatus(state, status){
+  changeMusicStatus(state: RootState, status: boolean){
     state.isMusicPaused = status
   },
-  changeMusicQueue(state, obj){
+  changeMusicQueue(state: RootState, obj: any){
     let ids = []
     for (const item of state.musicQueue) {
       ids.push(item.id)
@@ -22,7 +22,7 @@ const mutations: MutationTree<RootState> = {
     if(!ids.includes(obj.id))
       state.musicQueue.push(obj)
   },
-  deleteMusic(state,id){
+  deleteMusic(state: RootState, id: number){
     let queue = state.musicQueue
     for(let i = 0 ; i<queue.length ; i++){
       if(queue[i].id === id){
@@ -30,19 +30,19 @@ const mutations: MutationTree<RootState> = {
       }
     }
   },
-  clearMusicQueue(state){
+  clearMusicQueue(state: RootState){
     state.musicQueue = []
   },
-  changeNowIndex(state,index){
+  changeNowIndex(state: RootState, index: number){
     state.nowIndex = index
   },
-  deleteToNext(state){
+  deleteToNext(state: RootState){
     state.deleteToNext = !state.deleteToNext
   },
-  changeQueuePos(state,pos){
+  changeQueuePos(state: RootState, pos: any){
     state.queuePos = pos
   },
-  changeQueueStyle(state,status){
+  changeQueueStyle(state: RootState, status: any){
     state.queueStyle = status
   },
 }

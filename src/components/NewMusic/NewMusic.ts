@@ -6,7 +6,8 @@ import store from '@/store'
 
 export function useNewMusic() {
   let params = {
-    type: 0
+    type: 0,
+    realIP: '116.25.146.177'
   }
   let loading = ref(true)
   const tableData = ref([{}])
@@ -49,9 +50,12 @@ export function useNewMusic() {
 
   function play(row: any) {
     console.log(row)
-    let id = row.id
+    let params = {
+      id: row.id,
+      realIP: '116.25.146.177'
+    }
 
-    playMusicAPI({id}).then(res => {
+    playMusicAPI(params).then(res => {
       if (res.data.code === 200) {
         let url = res.data.data[0].url
 
@@ -62,7 +66,7 @@ export function useNewMusic() {
           songName:row.name,
           artistId:row.artistId,
           id:row.id,
-          duration:row.duration            
+          duration:row.duration
         }
         console.log(url)
         store.commit("changeMusicUrl", url)

@@ -6,9 +6,9 @@ let baseURL = ""
 if(process.env.NODE_ENV == "development"){
   baseURL = 'http://localhost:3000'
 }
-// else{
-//   baseURL = 'http://47.96.91.10:3000'
-// }
+else{
+  baseURL = 'https://netease-cloud-music-api-eight-ivory.vercel.app'
+}
 
 const service = axios.create({
   baseURL,

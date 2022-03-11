@@ -1,7 +1,7 @@
 <template>
   <div class="new-music" v-loading="loading">
     <div class="new-music-table">
-      <el-table :data="tableData" stripe>
+      <el-table :data="tableData" stripe @row-dblclick="play">
         <el-table-column prop="id" label="Date" width="180" />
         <el-table-column prop="name" label="Name" width="180" />
         <el-table-column prop="artists" label="Artist" />
@@ -19,17 +19,16 @@ import { useNewMusic } from '@/components/NewMusic/NewMusic'
 export default {
   name: 'NewMusic',
   setup() {
-    const { init, loading, tableData } = useNewMusic()
+    const { init, play, loading, tableData } = useNewMusic()
     init()
     return {
+      play,
       loading,
       tableData
     }
   },
   created(){
-    // this.$nextTick(() => {
-    //   this.loading = false
-    // })
+
   },
   data() {
     return {
@@ -37,7 +36,7 @@ export default {
     }
   },
   methods: {
-
+    
   },
 }
 </script>

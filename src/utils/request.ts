@@ -26,7 +26,7 @@ service.interceptors.response.use(
   error => {
     error && ElMessage({
       type: 'error',
-      message: '网络连接出问题了~',
+      message: '网络好像有点问题，刷新下试试？',
       showClose: true
     })
   }

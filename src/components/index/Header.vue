@@ -7,9 +7,9 @@
       <div class="nav" @click="go(-1)">
         <el-icon><arrow-left /></el-icon>
       </div>
-      <dir class="nav" @click="go(1)">
+      <div class="nav" @click="go(1)">
         <el-icon><arrow-right /></el-icon> 
-      </dir>
+      </div>
       
     </div>
     <div class="serachbar">
@@ -33,8 +33,8 @@ export default {
   },
 
   methods: {
-    go(n) {
-      this.$router.go(n)
+    go(destnation) {
+      this.$router.go(destnation)
     },
   },
 };
@@ -87,9 +87,6 @@ export default {
     
   }
 
-  .searchbox:focus{
-
-  }
   .searchbar{
     margin: auto 8px auto auto ;
     box-shadow: 12px 12px 2px 1px rgba(0, 0, 0, 1);

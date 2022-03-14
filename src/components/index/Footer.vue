@@ -19,7 +19,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue'
 import { useStore } from 'vuex'
-import PlayControl from '@/components/index/PlayControl/PlayControl.vue'
+import PlayControl from '@/components/index/PlayControl.vue'
 export default defineComponent({
   name: 'PageFooter',
   components: {

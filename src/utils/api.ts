@@ -34,8 +34,27 @@ export function getNewMvsAPI(params: Object) { // 获取新mv
 
 export function playMusicAPI(params: Object){
   return request({
-      url:'/song/url',
-      method:'get',
-      params
+    url:'/song/url',
+    method:'get',
+    params
   })
+}
+
+export function albumAPI(params: Object){
+  return request({
+    url:"/album",
+    method:'get',
+    params
+  })       
+}
+
+export function artistsAPI(params: Object, type=""){
+  let url = type=="" ? '/artists' : '/artist/'+type
+  if(type == 'simi')
+    url = '/simi/artist'
+  return request({
+    url,
+    method:'get',
+    params
+  })     
 }

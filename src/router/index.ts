@@ -3,6 +3,8 @@ import Index from '@/views/Index.vue'
 import SongLists from '@/views/SongLists.vue'
 import NewMusic from '@/views/NewMusic.vue'
 import MusicVideo from '@/views/MusicVideo.vue'
+import AlbumView from '@/components/AlbumView.vue'
+import ArtistView from '@/components/ArtistView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -25,6 +27,14 @@ const routes: Array<RouteRecordRaw> = [
     name: 'musicvideo',
     component: MusicVideo
   },
+  {
+    path:'/album',
+    component: AlbumView
+  },
+  {
+    path:'/artist',
+    component: ArtistView
+  }
   // {
   //   path: '/about',
   //   name: 'about',

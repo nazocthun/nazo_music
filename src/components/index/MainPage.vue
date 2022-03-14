@@ -76,9 +76,10 @@ export default {
     background-color: #ededed;
   }
 
-  // .sidebar a::before {
-  //   margin-right: 10px;
-  // }
+  .sidebar a::before {
+    content: '';
+    margin-right: 10px;
+  }
 
   .sidebar a {
     text-decoration: none;

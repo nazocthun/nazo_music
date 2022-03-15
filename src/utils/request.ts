@@ -3,10 +3,10 @@ import { ElMessage } from 'element-plus'
 
 let baseURL = ""
 
-if(process.env.NODE_ENV == "development"){
+if (process.env.NODE_ENV == "development"){
   baseURL = 'http://localhost:3000'
 }
-else{
+else {
   baseURL = 'https://netease-cloud-music-api-eight-ivory.vercel.app'
 }
 

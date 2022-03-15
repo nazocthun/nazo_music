@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import PageHeader from './components/index/Header.vue';
+import PageHeader from './components/index/PageHeader.vue';
 import MainPage from './components/index/MainPage.vue';
 import PageFooter from './components/index/Footer.vue';
 export default {

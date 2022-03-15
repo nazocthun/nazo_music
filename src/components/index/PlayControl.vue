@@ -35,73 +35,79 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent, watch } from 'vue'
+<script setup lang="ts">
+import { defineProps, defineEmits, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
-export default defineComponent({
-  name: 'PlayControl',
-  props: ['globalMusicUrl'],
-  setup(props, context) {
-    const isPaused = ref(true)
-    const isDragable = ref(false)
-    const audio = ref()
-    const duration = ref()
-    const currentTime = ref()
-
-    watch(() => props.globalMusicUrl, (newValue, _oldValue) => {
-      if(newValue) {
-        isPaused.value = false
-      } else {
-        isPaused.value = true
-        duration.value = 0
-        audio.value.currentTime = 0
-        currentTime.value = 0
-      }
-    })
-
-    function changeGlobalMusicStatus(option: String) {
-      if (option === 'play') {
-        if (props.globalMusicUrl) {
-          isPaused.value = !(isPaused.value)
-          audio.value.play()
-          console.log("play")
-          context.emit('play')
-        } else {
-          ElMessage({
-            type:'error',
-            message:'还没有播放音乐1111',
-            showClose:true
-          })
-        }
-      } else {
-        isPaused.value = !(isPaused.value)
-        audio.value.pause()
-        context.emit('pause')
-      }
-    }
-
-    function updateTime(e: any){
-      if(!(isDragable.value)){
-        currentTime.value = e.target.currentTime
-        context.emit('timeupdate', e)
-      }
-    }
-
-    function getDuration(e: any) {
-      duration.value = e.target.duration
-    }
-    return {
-      isPaused,
-      audio,
-      updateTime,
-      getDuration,
-      changeGlobalMusicStatus,
-    }
+const props = defineProps({
+  globalMusicUrl: {
+    type: String,
+    default: ''
   }
 })
 
+const em = defineEmits(['play', 'pause', 'timeupdate', 'end'])
 
+const isPaused = ref(true)
+const isDragable = ref(false)
+const audio = ref()
+const duration = ref()
+const currentTime = ref()
+
+watch(() => props.globalMusicUrl, (newValue, _oldValue) => {
+  if(newValue) {
+    isPaused.value = false
+  } else {
+    isPaused.value = true
+    duration.value = 0
+    audio.value.currentTime = 0
+    currentTime.value = 0
+  }
+})
+
+function changeGlobalMusicStatus(option: String) {
+  if (option === 'play') {
+    if (props.globalMusicUrl) {
+      isPaused.value = !(isPaused.value)
+      audio.value.play()
+      console.log("play")
+      em('play')
+    } else {
+      ElMessage({
+        type:'error',
+        message:'还没有播放音乐1111',
+        showClose:true
+      })
+    }
+  } else {
+    isPaused.value = !(isPaused.value)
+    audio.value.pause()
+    em('pause')
+  }
+}
+
+function updateTime(e: any){
+  if(!(isDragable.value)){
+    currentTime.value = e.target.currentTime
+    em('timeupdate', e)
+  }
+}
+
+function getDuration(e: any) {
+  duration.value = e.target.duration
+}
+
+function onEnded(){
+  em('end')
+}
+
+function prev() {
+
+}
+
+function next() {
+  
+}
 </script>
 
 <style>

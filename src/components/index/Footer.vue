@@ -16,56 +16,40 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import PlayControl from '@/components/index/PlayControl.vue'
-export default defineComponent({
-  name: 'PageFooter',
-  components: {
-    PlayControl,
-  },
-  setup(_props, context) {
-    const store = useStore()
-    const defaultImg = require("@/assets/defaultImg.png")
-    const globalMusicUrl = computed(() => store.state.globalMusicUrl)
-    const globalMusicInfo = computed(() => store.state.globalMusicInfo)
-    const musicQueue = computed(() => store.state.musicQueue)
-    const nowIndex = computed(() => store.state.nowIndex)
-    const queueStyle = computed(() => store.state.queueStyle)
 
-    const currentTime = ref()
-    function updateTime(e: any) { // TODO: 
-      currentTime.value = e.target.currentTime
-      // console.log("目前歌单index为："+nowIndex)
-    }
-    function globalPlayStatus() {
-      store.commit('changeMusicStatus', false)
-    }
-    function globalPauseStatus() {
-      store.commit('changeMusicStatus', true)
-    }
-    function next() { // TODO: 
-      
-    }
-    function prev() { // TODO: 
+const store = useStore()
 
-    }
-    return {
-      defaultImg,
-      globalMusicUrl,
-      globalMusicInfo,
-      musicQueue,
-      nowIndex,
-      queueStyle,
-      updateTime,
-      globalPlayStatus,
-      globalPauseStatus,
-      next,
-      prev
-    }
-  }
-})
+const defaultImg = require("@/assets/defaultImg.png")
+const globalMusicUrl = computed(() => store.state.globalMusicUrl)
+const globalMusicInfo = computed(() => store.state.globalMusicInfo)
+const musicQueue = computed(() => store.state.musicQueue)
+const nowIndex = computed(() => store.state.nowIndex)
+const queueStyle = computed(() => store.state.queueStyle)
+const currentTime = ref()
+function updateTime(e: any) { // TODO: 
+  currentTime.value = e.target.currentTime
+  // console.log("目前歌单index为："+nowIndex)
+}
+function globalPlayStatus() {
+  store.commit('changeMusicStatus', false)
+}
+function globalPauseStatus() {
+  store.commit('changeMusicStatus', true)
+}
+function next() { // TODO: 
+  
+}
+function prev() { // TODO: 
+
+}
+
+function toSongDetail() { // TODO: 
+
+}
 </script>
 
 <style lang="scss">

@@ -6,7 +6,7 @@
         <el-table-column width="100">
           <template #default="scope">
             <div class="img-wrap">
-              <img v-lazy="scope.row.imgUrl" alt="">
+              <img :src="scope.row.imgUrl" alt="">
               <p class="play-button" @click="play(scope.row)">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 24 24" width="32" fill="currentColor" data-darkreader-inline-fill="" style="--darkreader-inline-fill:currentColor;"><path d="M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10-4.477 10-10 10zm4.126-8.254c.213-.153.397-.348.54-.575.606-.965.365-2.27-.54-2.917L10.07 5.356A1.887 1.887 0 0 0 8.972 5C7.883 5 7 5.941 7 7.102v5.796c0 .417.116.824.334 1.17.607.965 1.832 1.222 2.737.576l4.055-2.898zm-5.2-4.616l4.055 2.898-4.056 2.897V7.13z"></path></svg>
               </p>
@@ -39,97 +39,62 @@
   
 </template>
 
-<script lang="ts">
-import { ref, defineComponent, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getNewSongsAPI, playMusicAPI } from '@/utils/api'
+import { getNewSongsAPI } from '@/utils/api'
 import { durationToTimeStamps } from '@/utils/utils'
 import usePlay from '@/hooks/usePlay'
-import store from '@/store'
 
-export default defineComponent({
-  name: 'NewMusic',
-  setup() {
-    let params = {
-      type: 0,
-      realIP: '116.25.146.177'
-    }
-    let loading = ref(true)
-    const tableData = ref([{}])
-    onMounted(() => {
-      init()
-    })
-    function init() {
-      getNewSongsAPI(params).then(res => {
-        let resultList = res.data.data.slice(0,50)
-        console.log(resultList)
-        let songsList = []
-        for (const item of resultList) {
-          let song = {
-            id: item.id,
-            name: item.name,
-            artistInfo: item.artists,
-            album: item.album.name,
-            albumId: item.album.id,
-            duration: durationToTimeStamps(item.duration),
-            imgUrl: item.album.picUrl,
-            url: item.mp3Url,
-            cover: item.album.picUrl,
-          }
-          songsList.push(song)
-        }
-        tableData.value = songsList
-        loading.value = false
-      })
-    }
+let loading = ref(true)
+const tableData = ref([{}])
 
-    const { play } = usePlay()
+// API参数
+let params = {
+  type: 0,
+  realIP: '116.25.146.177'
+}
 
-    // function play(row: any) {
-    //   console.log(row)
-    //   let params = {
-    //     id: row.id,
-    //     realIP: '116.25.146.177'
-    //   }
-    //   playMusicAPI(params).then(res => {
-    //     if (res.data.code === 200) {
-    //       let url = res.data.data[0].url
-    //       let musicInfo = {
-    //         imgUrl:row.imgUrl,
-    //         artistInfo:row.artistInfo,
-    //         // singer:row.singer,
-    //         songName:row.name,
-    //         artistId:row.artistId,
-    //         id:row.id,
-    //         duration:row.duration
-    //       }
-    //       console.log(url)
-    //       store.commit("changeMusicUrl", url)
-    //       store.commit("changeMusicInfo", musicInfo)
-    //       store.commit("changeMusicStatus", false)
-    //     }
-    //   })
-    // }
-    
-    const router = useRouter()
-    function toArtist(id: any) {
-      console.log(id)
-      router.push(`/artist?artistId=${id}`)
-    }
-    function toAlbum(id: any){
-      console.log(id)
-      router.push(`/album?id=${id}`)
-    }
+onMounted(() => { init() })
 
-    return {
-      play,
-      toArtist,
-      toAlbum,
-      loading,
-      tableData
+// 通过API获得最新歌曲信息
+function init() {
+  getNewSongsAPI(params).then(res => {
+    let resultList = res.data.data.slice(0,50)
+    console.log(resultList)
+    let songsList = []
+    for (const item of resultList) {
+      let song = {
+        id: item.id,
+        name: item.name,
+        artistInfo: item.artists,
+        album: item.album.name,
+        albumId: item.album.id,
+        duration: durationToTimeStamps(item.duration),
+        imgUrl: item.album.picUrl,
+        url: item.mp3Url,
+        cover: item.album.picUrl,
+      }
+      songsList.push(song)
     }
-  }
-})
+    tableData.value = songsList
+    loading.value = false
+  })
+}
+
+// 播放音乐Hook
+const { play } = usePlay()
+
+// 路由跳转
+const router = useRouter()
+function toArtist(id: any) {
+  console.log(id)
+  router.push(`/artist?artistId=${id}`)
+}
+function toAlbum(id: any){
+  console.log(id)
+  router.push(`/album?id=${id}`)
+}
 </script>
 
 <style scoped>

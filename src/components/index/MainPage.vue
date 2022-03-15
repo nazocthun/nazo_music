@@ -26,26 +26,8 @@
   
 </template>
 
-<script>
-export default {
-  name: 'MainPage',
-  components: {
-    
-  },
-  data() {
-    return {
-      
-    }
-  },
+<script setup lang="ts">
 
-  mounted() {
-    
-  },
-
-  methods: {
-    
-  },
-};
 </script>
 
 <style lang="scss">

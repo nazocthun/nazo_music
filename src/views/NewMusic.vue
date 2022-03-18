@@ -23,14 +23,15 @@
                 <span style="color:#606266;" v-show="scope.row.artistInfo.length != 1 && i!=scope.row.artistInfo.length-1">
                   &amp;&nbsp;
                 </span>
-            </div>                                    
-          </template>                                  
+            </div>
+          </template>
         </el-table-column>
 
         <el-table-column prop="album" label="专辑" width="">
           <template #default="scope">
             <span style="cursor:pointer;color:#2980b9;" @click="toAlbum(scope.row.albumId)">{{scope.row.album}}</span>
-          </template>                                  
+            <span class="plus" title="添加至待播列表" @click="addToQueue(scope.row, 'plus')">+</span>
+          </template>
         </el-table-column>
         <el-table-column prop="duration" label="时长" width="100"/>
       </el-table>
@@ -40,11 +41,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getNewSongsAPI } from '@/utils/api'
+import { ElMessage } from 'element-plus'
 import { durationToTimeStamps } from '@/utils/utils'
 import usePlay from '@/hooks/usePlay'
+import { useStore } from 'vuex'
 
 let loading = ref(true)
 const tableData = ref([{}])
@@ -83,7 +86,42 @@ function init() {
 }
 
 // 播放音乐Hook
-const { play } = usePlay()
+const { play, addToQueue } = usePlay('newMusic', ref(false))
+
+const musicQueue = computed(() => store.state.musicQueue)
+const store = useStore()
+// function addToQueue(row: any) {
+//   console.log(row)
+//   let obj = {
+//     id:row.id,
+//     imgUrl:row.imgUrl,
+//     duration:row.duration,
+//     // singer:row.ar[0].name,
+//     // artistId:row.ar[0].id,
+//     artistInfo:row.artistInfo,
+//     songName:row.name
+//   }
+//   let ids = []
+//   for (const item of musicQueue.value) {
+//     ids.push(item.id)
+//   }
+//   if(ids.indexOf(obj.id) == -1){
+//     // this.beginAnimation(e.x,e.y)
+//     setTimeout(() => {
+//       store.commit('changeQueueStyle','add')
+//       store.commit('changeMusicQueue',obj)
+//     }, 500)
+//     setTimeout(() => {
+//       store.commit('changeQueueStyle','normal')
+//     }, 1000)
+//   }else{
+//     ElMessage({
+//       type: 'warning',
+//       message: "已经在播放列表中了",
+//       showClose: true
+//     })
+//   }
+// }
 
 // 路由跳转
 const router = useRouter()

@@ -34,7 +34,7 @@
         <el-table-column prop="al.name" label="专辑" >
           <template #default="scope">
             <span style="cursor:pointer;color:#2980b9;" @click="toAlbum(scope.row.al.id)">{{scope.row.al.name}}</span>
-            <span class="plus" title="添加至待播列表" @click="addToQueue(scope.row,$event)">+</span>
+            <span class="plus" title="添加至待播列表" @click="addToQueue(scope.row, 'plus')">+</span>
           </template>
         </el-table-column>
 
@@ -70,39 +70,39 @@ onMounted(() => {
 })
 
 // 播放队列
-function addToQueue(row: any, e: any) {
-  console.log(row)
-  let obj = {
-    id:row.id,
-    imgUrl:row.al.picUrl,
-    duration:row.dt,
-    // singer:row.ar[0].name,
-    // artistId:row.ar[0].id,
-    artistInfo:row.ar,
-    songName:row.name
-  }
+// function addToQueue(row: any) {
+//   console.log(row)
+//   let obj = {
+//     id:row.id,
+//     imgUrl:row.al.picUrl,
+//     duration:row.dt,
+//     // singer:row.ar[0].name,
+//     // artistId:row.ar[0].id,
+//     artistInfo:row.ar,
+//     songName:row.name
+//   }
 
-  let ids = []
-  for (const item of musicQueue.value) {
-    ids.push(item.id)
-  }
-  if(ids.indexOf(obj.id) == -1){
-    // this.beginAnimation(e.x,e.y)
-    setTimeout(() => {
-      store.commit('changeQueueStyle','add')      
-      store.commit('changeMusicQueue',obj)  
-    }, 500);
-    setTimeout(() => {
-      store.commit('changeQueueStyle','normal')                   
-    }, 1000);
-  }else{
-    ElMessage({
-      type: 'warning',
-      message: "已经在播放列表中了",
-      showClose: true
-    })
-  }            
-}
+//   let ids = []
+//   for (const item of musicQueue.value) {
+//     ids.push(item.id)
+//   }
+//   if(ids.indexOf(obj.id) == -1){
+//     // this.beginAnimation(e.x,e.y)
+//     setTimeout(() => {
+//       store.commit('changeQueueStyle','add')
+//       store.commit('changeMusicQueue',obj)
+//     }, 500)
+//     setTimeout(() => {
+//       store.commit('changeQueueStyle','normal')
+//     }, 1000)
+//   }else{
+//     ElMessage({
+//       type: 'warning',
+//       message: "已经在播放列表中了",
+//       showClose: true
+//     })
+//   }            
+// }
 
 //API参数
 let params = {
@@ -136,8 +136,8 @@ function getAlbumInfo(params: Object) {
   })
 }
 
-// 播放音乐Hook
-const { play } = usePlay()
+// 播放音乐, 加入队列Hook
+const { play, addToQueue } = usePlay('album', ref(false))
 
 
 function playAll() { // TODO:

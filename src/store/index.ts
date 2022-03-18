@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
 import { RootState } from './types'
 import mutations from './mutations'
@@ -13,6 +14,7 @@ const store: StoreOptions<RootState> = {
     deleteToNext:false,
     queuePos:{},
     queueStyle:'normal',
+    musicChangedFlag: true,
   },
   mutations
 }

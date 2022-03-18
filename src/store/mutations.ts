@@ -11,7 +11,7 @@ const mutations: MutationTree<RootState> = {
   changeCurrentTime(state: RootState, time: any){
     state.globalCurrentTime = time
   },
-  changeMusicStatus(state: RootState, status: boolean){
+  changeMusicPausedStatus(state: RootState, status: boolean){
     state.isMusicPaused = status
   },
   changeMusicQueue(state: RootState, obj: any){
@@ -45,6 +45,9 @@ const mutations: MutationTree<RootState> = {
   changeQueueStyle(state: RootState, status: any){
     state.queueStyle = status
   },
+  musicChanged(state: RootState) {
+    state.musicChangedFlag = !state.musicChangedFlag
+  }
 }
 
 export default mutations

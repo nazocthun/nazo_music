@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import Index from '@/views/Index.vue'
+import Discover from '@/views/Discover.vue'
 import SongLists from '@/views/SongLists.vue'
 import NewMusic from '@/views/NewMusic.vue'
 import MusicVideo from '@/views/MusicVideo.vue'
@@ -10,7 +10,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'index',
-    component: Index
+    component: Discover
   },
   {
     path: '/songlists',

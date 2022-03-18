@@ -24,6 +24,10 @@ export interface similarArtistTypes {
   picUrl: string,
 }
 
-interface song {
-  dt: Number // 时长
+export interface musicInfoTypes {
+  imgUrl: string,
+  artistInfo: Object,
+  songName: string,
+  id: number,
+  duration: number
 }

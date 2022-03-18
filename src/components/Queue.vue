@@ -1,0 +1,318 @@
+<template>
+  <div class="queue">
+    <div class="queue-tabs">
+      <el-tabs v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane label="播放列表" name="playList">
+            <div class="queue-head">
+                <span>共{{musicQueue.length}}首</span>
+                <span class="clear" @click="clearMusicQueue">清空列表</span>
+            </div>
+            <ul class="queue-wrap">
+              <el-scrollbar style="height:100%">
+                <li class="queue-song" v-for="item in musicQueue" :key="item.id" @dblclick="play(item)" :class="{'active-song':item.id==globalMusicInfo.id}">
+                  <div class="playingIcon" v-show="item.id==globalMusicInfo.id && !isMusicPaused">
+                    <div class="playingIcon1"></div>
+                    <div class="playingIcon2"></div>
+                    <div class="playingIcon3"></div>
+                  </div>
+                  <span :class="{'playingIcon iconfont icon-zanting':isMusicPaused && item.id==globalMusicInfo.id}"></span>
+                  <span class="queue-song-name">{{item.songName}}</span>
+
+                  <div class="queue-song-singer">
+                    <span v-for="(singer,i) in item.artistInfo" :key="i" @click.stop="toArtist(singer.id)">{{singer.name}} </span>
+                  </div>
+
+                  <span class="queue-song-duration">{{item.duration}}</span>
+                  <span class="queue-song-delete" @click="deleteQueue(item.id)">×</span>
+                </li>
+              </el-scrollbar>
+            </ul>
+        </el-tab-pane>
+        <el-tab-pane label="播放历史" name="history">播放历史</el-tab-pane>
+      </el-tabs>
+      <span v-if="!musicQueue.length" class="queue-tip">什么都没有~快去听歌吧</span>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import usePlay from '@/hooks/usePlay';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { ElMessageBox, ElMessage } from 'element-plus'
+
+const store = useStore()
+const musicQueue = computed(() => store.state.musicQueue)
+const globalMusicInfo = computed(() => store.state.globalMusicInfo)
+const isMusicPaused = computed(() => store.state.isMusicPaused)
+const nowIndex = computed(() => store.state.nowIndex)
+const deleteToNext = computed(() => store.state.deleteToNext)
+const activeName = ref('playList')
+const { play } = usePlay('queue', isMusicPaused)
+
+function handleClick(tab: any) {
+  console.log(tab)
+}
+
+function clearMusicQueue() {
+  if(musicQueue.value.length == 0)
+    ElMessage({
+      message: '已经是空的了~',
+      type: 'warning',
+      showClose: true
+    })
+  else{
+    ElMessageBox.confirm('确定清空列表吗?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      store.commit("changeMusicUrl", "")
+      store.commit("changeMusicInfo", {})
+      store.commit("changeMusicPausedStatus", true)
+      store.commit("changeCurrentTime", 0)
+      setTimeout(() => {
+        store.commit('clearMusicQueue')
+      }, 100)
+      ElMessage({
+        type: 'success',
+        message: '已清空!'
+      })
+    }).catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '已取消清空'
+      })
+    })
+  }
+}
+
+function deleteQueue(id: number) { // 
+  //   console.log(id)
+  ElMessageBox.confirm('确定删除该歌曲吗?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    let ids = []
+    for (const item of musicQueue.value) {
+      ids.push(item.id)
+    }
+    let indexOfId = ids.indexOf(id)
+
+    setTimeout(() => {
+      store.commit('changeQueueStyle','delete')
+      store.commit('deleteMusic', id)
+      if (indexOfId < nowIndex.value) { // 删除的是当前播放之前的歌曲
+        store.commit('changeNowIndex', nowIndex.value - 1)          
+      } else if (indexOfId == nowIndex.value){ // 删除的是当前播放的歌曲
+        store.commit('deleteToNext')
+      }
+    }, 300)
+    setTimeout(() => {
+      store.commit('changeQueueStyle','normal')                   
+    }, 1000)
+  }).catch(() => {
+    ElMessage({
+      type: 'info',
+      message: '已取消删除'
+    })
+  })
+}
+
+// 监视删除状态
+watch(deleteToNext, () => {
+  // 队列中还有音乐播放下一首
+  if (nowIndex.value < musicQueue.value.length) {
+    play(musicQueue.value[nowIndex.value])
+  }
+  // 队列中没有音乐重置
+  if (musicQueue.value.length == 0) {
+    store.commit("changeNowIndex",0)
+    store.commit("changeMusicUrl","")
+    store.commit("changeMusicInfo",{})
+    store.commit("changeMusicPausedStatus",true)
+    store.commit("changeCurrentTime",0)
+    // 如果打开歌词页面 则关闭
+    // this.$parent.show = true
+    setTimeout(() => {
+      store.commit('clearMusicQueue')
+    }, 100)
+  }
+  //当前播放是队列最后一首，跳回第一首
+  if(nowIndex.value == musicQueue.value.length)
+    store.commit("changeNowIndex", 0)
+})
+
+const router = useRouter()
+function toArtist(id: any){
+  router.push(`/artist?artistId=${id}`)
+}
+</script>
+
+<style>
+.queue {
+    width: 25%;
+    min-width: 300px;
+    height: 70%;
+    position: fixed;
+    right: 10px;
+    bottom: 59px;
+    border: 1px solid #7f8c8d;
+    /* border-radius: 10px; */
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: #fff;
+    box-sizing: border-box;
+    font-size: 14px;
+    box-shadow: 0 0 5px rgba(0,0,0,.6);
+  }
+
+  .queue-tabs .el-tabs__item{
+    font-size: 14px;
+  }
+
+  .queue-tabs .el-tabs__header {
+    margin: 15px;
+  }
+
+  .queue-head {
+    color: #bdc3c7;
+    padding-bottom: 10px;
+    margin: 10px 15px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .clear {
+    color: #686de0;
+    float: right;
+    cursor: pointer;
+  }
+
+  .queue-wrap {
+    height: 550px;
+    position: relative;
+  }
+
+  .queue-tip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%,-50%,0);
+    color: #bdc3c7;
+  }
+
+  .queue-song{
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    background-color: #fff;
+    font-weight: 200;
+    color: #363636;
+    cursor: pointer;
+  }
+
+  .playingIcon {
+    width: 14px;
+    height: 14px;
+    overflow: hidden;
+    display: flex;
+    position: absolute;
+    left: 5px;
+    font-weight: bold;
+  }
+
+  .playingIcon div{
+    background-color: rgb(236, 65, 65);
+    width: 4px;
+    margin: 0 1px;
+    height: 100%;
+  }
+
+  .playingIcon1 {
+    /* transform: translate3d(0,0,0); */
+    animation: playingIcon;
+    animation-duration: .5s;
+    animation-delay: 0;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-out;
+    animation-direction: alternate-reverse;
+  }
+
+  .playingIcon2 {
+    /* transform: translate3d(0,4px,0); */
+    animation: playingIcon;
+    animation-duration: .5s;
+    animation-delay: .2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-out;
+    animation-direction: alternate-reverse;
+  }
+
+  .playingIcon3 {
+    /* transform: translate3d(0,8px,0); */
+    animation: playingIcon;
+    animation-duration: .5s;
+    animation-delay: .5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-out;
+    animation-direction: alternate-reverse;
+  }
+
+  @keyframes playingIcon {
+    from{
+        transform: translate3d(0,0,0);
+    }
+    to{
+        transform: translate3d(0,80%,0);
+    }
+  }
+
+
+  .queue-song:nth-of-type(even) {
+    background-color: #f9f9f9;
+  }
+
+  .queue-song:not(.active-song):hover {
+    background-color: #f5f6fa;
+    color: #0097e6;
+  }
+
+  .queue-song:hover .queue-song-delete {
+    display: block;
+  }
+
+  .queue-song-name {
+    width: 40%;
+    margin-left: 25px;
+    margin-right: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .queue-song-singer {
+    width: 30%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #2980b9;
+  }
+
+  .queue-song-duration {
+    width: 15%;
+  }
+
+  .queue-song-delete {
+    cursor: pointer;
+    margin-right:15px;
+    color: #3e3e3e;
+    display: none;
+  }
+
+  .active-song {
+    color: rgb(236, 65, 65);
+    position: relative;
+  }
+</style>

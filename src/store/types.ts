@@ -12,4 +12,5 @@ export interface RootState {
   deleteToNext: boolean,
   queuePos: Object,
   queueStyle: string,
+  musicChangedFlag: boolean,
 }

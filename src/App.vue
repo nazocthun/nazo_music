@@ -2,35 +2,27 @@
   <el-container direction="vertical">
     <PageHeader></PageHeader>
     <MainPage class="mainpage"></MainPage>
-    <PageFooter class="footer"></PageFooter>
+    <transition name="fade">
+      <Queue v-show="showQueue"></Queue>
+    </transition>
+    <PageFooter class="footer" @toggle="toggleQueue"></PageFooter>
   </el-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import PageHeader from './components/index/PageHeader.vue';
 import MainPage from './components/index/MainPage.vue';
 import PageFooter from './components/index/Footer.vue';
-export default {
-  name: 'NazoMusicApp',
-  components: {
-    PageHeader,
-    MainPage,
-    PageFooter,
-  },
-  data() {
-    return {
-      
-    };
-  },
+import Queue from './components/Queue.vue';
+import { ref } from 'vue'
 
-  mounted() {
-    
-  },
+const showQueue = ref(false)
 
-  methods: {
-    
-  },
-};
+function toggleQueue() {
+  showQueue.value = !showQueue.value
+  console.log("app.vue tooggle")
+}
+
 </script>
 
 <style lang="scss">

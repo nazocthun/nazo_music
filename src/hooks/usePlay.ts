@@ -5,13 +5,12 @@ import { playMusicAPI } from "../utils/api"
 import { musicInfoTypes } from '@/utils/interfaces'
 
 export default function usePlay(location: string, isPaused: Ref<Boolean> | ComputedRef<Boolean>) {
-  
+  // 播放音乐
   function play(row: any) {
     let params = {
       id: row.id,
       realIP: '116.25.146.177'
     }
-    console.log(row)
     playMusicAPI(params).then(res => {
       if (res.data.code === 200) {
         let url = res.data.data[0].url
@@ -36,10 +35,9 @@ export default function usePlay(location: string, isPaused: Ref<Boolean> | Compu
     })
     addToQueue(row, 'doubleclick')
   }
-
+  // 添加到播放列表
   const musicQueue = computed(() => store.state.musicQueue)
   function addToQueue(row: any, addType: string) {
-    console.log(row)
     let obj = {} as musicInfoTypes
     obj.id = row.id
     obj.imgUrl = row.imgUrl

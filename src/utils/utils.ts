@@ -11,3 +11,7 @@ export  function formatDate(now: Date): string {
   var date = now.getDate().toString().padStart(2, '0')
   return `${year}-${month}-${date}`
 }
+
+export function getCompressedImgUrl(url: string, size: number): string {
+  return `${url}?param=${size}y${size}`
+}

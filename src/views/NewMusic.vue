@@ -45,7 +45,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getNewSongsAPI } from '@/utils/api'
 import { ElMessage } from 'element-plus'
-import { durationToTimeStamps } from '@/utils/utils'
+import { durationToTimeStamps, getCompressedImgUrl } from '@/utils/utils'
 import usePlay from '@/hooks/usePlay'
 import { useStore } from 'vuex'
 
@@ -74,7 +74,7 @@ function init() {
         album: item.album.name,
         albumId: item.album.id,
         duration: durationToTimeStamps(item.duration),
-        imgUrl: item.album.picUrl,
+        imgUrl: getCompressedImgUrl(item.album.picUrl, 100),
         url: item.mp3Url,
         cover: item.album.picUrl,
       }
@@ -142,7 +142,7 @@ function toAlbum(id: any){
     padding: 20px;
   }
 
-  .new-music >>> .el-loading-spinner {
+  .new-music :deep(.el-loading-spinner) {
     top: 50%;
   }
 

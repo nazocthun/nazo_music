@@ -2,7 +2,7 @@
   <div class="playlist" v-loading="loading">
     <div class="playlist-top-card">
       <div class="playlist-img-wrap">
-        <img :src="albumInfo.picUrl" alt="">
+        <img :src="getCompressedImgUrl(albumInfo.picUrl, 500)" alt="">
       </div>
       <div class="playlist-info">
         <div class="playlist-name">
@@ -48,61 +48,24 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
 import { albumAPI } from '@/utils/api'
 import { albumInfoTypes } from '@/utils/interfaces'
-import { durationToTimeStamps, formatDate } from '@/utils/utils'
+import { durationToTimeStamps, formatDate, getCompressedImgUrl } from '@/utils/utils'
 import usePlay from '@/hooks/usePlay'
 
 const store = useStore()
+const loading = ref(true)
 const musicQueue = computed(() => store.state.musicQueue)
 
-const tableData = ref([])
+
 
 const albumId = ref()
-const loading = ref(true)
-
 onMounted(() => {
   albumId.value = route.query.id
   params.id = albumId.value
   getAlbumInfo(params)
   // this.getComments(true)
 })
-
-// 播放队列
-// function addToQueue(row: any) {
-//   console.log(row)
-//   let obj = {
-//     id:row.id,
-//     imgUrl:row.al.picUrl,
-//     duration:row.dt,
-//     // singer:row.ar[0].name,
-//     // artistId:row.ar[0].id,
-//     artistInfo:row.ar,
-//     songName:row.name
-//   }
-
-//   let ids = []
-//   for (const item of musicQueue.value) {
-//     ids.push(item.id)
-//   }
-//   if(ids.indexOf(obj.id) == -1){
-//     // this.beginAnimation(e.x,e.y)
-//     setTimeout(() => {
-//       store.commit('changeQueueStyle','add')
-//       store.commit('changeMusicQueue',obj)
-//     }, 500)
-//     setTimeout(() => {
-//       store.commit('changeQueueStyle','normal')
-//     }, 1000)
-//   }else{
-//     ElMessage({
-//       type: 'warning',
-//       message: "已经在播放列表中了",
-//       showClose: true
-//     })
-//   }            
-// }
 
 //API参数
 let params = {
@@ -115,6 +78,7 @@ const albumInfo = ref({} as albumInfoTypes)
 const commentCount = ref()
 const artistName = ref()
 const albumDescList = ref()
+const tableData = ref([])
 function getAlbumInfo(params: Object) {
   albumAPI(params).then( res => {
     albumInfo.value = res.data.album
@@ -139,7 +103,6 @@ function getAlbumInfo(params: Object) {
 // 播放音乐, 加入队列Hook
 const { play, addToQueue } = usePlay('album', ref(false))
 
-
 function playAll() { // TODO:
 
 }
@@ -155,7 +118,6 @@ function toAlbum(id: any){
   console.log(id)
   router.push(`/album?id=${id}`)
 }
-
 
 const activeName = ref('first')
 

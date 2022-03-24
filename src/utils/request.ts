@@ -10,12 +10,12 @@ else {
   baseURL = 'https://netease-cloud-music-api-eight-ivory.vercel.app'
 }
 
-const service = axios.create({
+const http = axios.create({
   baseURL,
   timeout: 5000
 })
 
-service.interceptors.response.use(
+http.interceptors.response.use(
   response => {
     if (response.status == 200) {
       return Promise.resolve(response)
@@ -32,4 +32,8 @@ service.interceptors.response.use(
   }
 )
 
-export default service
+export const getRequest = (url: string, params = {}) => {
+  return http.get(url, { params: { ...params } })
+}
+
+export default http

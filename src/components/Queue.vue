@@ -1,36 +1,39 @@
 <template>
-  <div class="queue">
-    <div class="queue-tabs">
+  <div class="w-1/4 min-w-300 h-2/3 fixed right-2 bottom-14 border border-solid border-gray-500 rounded-t-md bg-white box-border text-sm shadow">
+    <div class="">
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="播放列表" name="playList">
-            <div class="queue-head">
-                <span>共{{musicQueue.length}}首</span>
-                <span class="clear" @click="clearMusicQueue">清空列表</span>
+            <div class="text-stone-400 pb-2 mx-2 my-3 border-b-2">
+              <span>共{{musicQueue.length}}首</span>
+              <span class="text-orange-700 float-right cursor-pointer" @click="clearMusicQueue">清空列表</span>
             </div>
-            <ul class="queue-wrap">
+            <ul class="h-96 relative">
               <el-scrollbar style="height:100%">
-                <li class="queue-song" v-for="item in musicQueue" :key="item.id" @dblclick="play(item)" :class="{'active-song':item.id==globalMusicInfo.id}">
-                  <div class="playingIcon" v-show="item.id==globalMusicInfo.id && !isMusicPaused">
-                    <div class="playingIcon1"></div>
-                    <div class="playingIcon2"></div>
-                    <div class="playingIcon3"></div>
+                <li class="queue-song flex items-center py-2 bg-white text-black cursor-pointer"
+                  v-for="item in musicQueue" 
+                  :key="item.id" @dblclick="doubleClickPlay(item)" 
+                  :class="{'active-song':item.id==globalMusicInfo.id}">
+                  <div class="w-3.5 h-3.5 overflow-hidden flex absolute left-[5px] " v-show="item.id==globalMusicInfo.id && !isMusicPaused">
+                    <div class="playIcon animate-playicon"></div>
+                    <div class="playIcon animate-playicon animation-delay-200"></div>
+                    <div class="playIcon animate-playicon animation-delay-500"></div>
                   </div>
                   <span :class="{'playingIcon iconfont icon-zanting':isMusicPaused && item.id==globalMusicInfo.id}"></span>
-                  <span class="queue-song-name">{{item.songName}}</span>
+                  <span class="w-1/2 mx-6 overflow-hidden text-ellipsis whitespace-nowrap">{{item.songName}}</span>
 
-                  <div class="queue-song-singer">
+                  <div class="w-1/3 overflow-hidden text-ellipsis whitespace-nowrap text-sky-600">
                     <span v-for="(singer,i) in item.artistInfo" :key="i" @click.stop="toArtist(singer.id)">{{singer.name}} </span>
                   </div>
 
-                  <span class="queue-song-duration">{{item.duration}}</span>
-                  <span class="queue-song-delete" @click="deleteQueue(item.id)">×</span>
+                  <span class="w-1/6">{{item.duration}}</span>
+                  <span class="queue-song-delete cursor-pointer mr-3 text-stone-400 hidden" @click="deleteQueue(item.id)">×</span>
                 </li>
               </el-scrollbar>
             </ul>
         </el-tab-pane>
         <el-tab-pane label="播放历史" name="history">播放历史</el-tab-pane>
       </el-tabs>
-      <span v-if="!musicQueue.length" class="queue-tip">什么都没有~快去听歌吧</span>
+      <span v-if="!musicQueue.length" class="absolute top-1/2 left-1/2 text-stone-400 -translate-x-1/2 -translate-y-1/2">队列是空的</span>
     </div>
   </div>
 </template>
@@ -49,7 +52,7 @@ const isMusicPaused = computed(() => store.state.isMusicPaused)
 const nowIndex = computed(() => store.state.nowIndex)
 const deleteToNext = computed(() => store.state.deleteToNext)
 const activeName = ref('playList')
-const { play } = usePlay('queue', isMusicPaused)
+const { play, doubleClickPlay } = usePlay('queue', isMusicPaused)
 
 function handleClick(tab: any) {
   console.log(tab)
@@ -112,7 +115,7 @@ function deleteQueue(id: number) { //
     }, 300)
     setTimeout(() => {
       store.commit('changeQueueStyle','normal')                   
-    }, 1000)
+    }, 300)
   }).catch(() => {
     ElMessage({
       type: 'info',
@@ -125,7 +128,7 @@ function deleteQueue(id: number) { //
 watch(deleteToNext, () => {
   // 队列中还有音乐播放下一首
   if (nowIndex.value < musicQueue.value.length) {
-    play(musicQueue.value[nowIndex.value])
+    play(musicQueue.value[nowIndex.value], 'queue')
   }
   // 队列中没有音乐重置
   if (musicQueue.value.length == 0) {
@@ -142,7 +145,12 @@ watch(deleteToNext, () => {
   }
   //当前播放是队列最后一首，跳回第一首
   if(nowIndex.value == musicQueue.value.length)
+    console.log(nowIndex.value, musicQueue.value.length)
     store.commit("changeNowIndex", 0)
+})
+
+watch(nowIndex, () => {
+  play(musicQueue.value[nowIndex.value], 'queue')
 })
 
 const router = useRouter()
@@ -152,167 +160,30 @@ function toArtist(id: any){
 </script>
 
 <style>
-.queue {
-    width: 25%;
-    min-width: 300px;
-    height: 70%;
-    position: fixed;
-    right: 10px;
-    bottom: 59px;
-    border: 1px solid #7f8c8d;
-    /* border-radius: 10px; */
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    background-color: #fff;
-    box-sizing: border-box;
-    font-size: 14px;
-    box-shadow: 0 0 5px rgba(0,0,0,.6);
-  }
 
-  .queue-tabs .el-tabs__item{
-    font-size: 14px;
-  }
+.el-tabs__header {
+  @apply m-3
+}
 
-  .queue-tabs .el-tabs__header {
-    margin: 15px;
-  }
+.playIcon {
+  @apply bg-orange-700 w-1 mx-px h-full
+}
 
-  .queue-head {
-    color: #bdc3c7;
-    padding-bottom: 10px;
-    margin: 10px 15px;
-    border-bottom: 1px solid #eee;
-  }
+.queue-song:nth-of-type(even) {
+  background-color: #f9f9f9;
+}
 
-  .clear {
-    color: #686de0;
-    float: right;
-    cursor: pointer;
-  }
+.queue-song:not(.active-song):hover {
+  background-color: #f5f6fa;
+  @apply text-sky-600
+}
 
-  .queue-wrap {
-    height: 550px;
-    position: relative;
-  }
+.queue-song:hover .queue-song-delete {
+  display: block;
+}
 
-  .queue-tip {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate3d(-50%,-50%,0);
-    color: #bdc3c7;
-  }
-
-  .queue-song{
-    display: flex;
-    align-items: center;
-    padding: 10px 0;
-    background-color: #fff;
-    font-weight: 200;
-    color: #363636;
-    cursor: pointer;
-  }
-
-  .playingIcon {
-    width: 14px;
-    height: 14px;
-    overflow: hidden;
-    display: flex;
-    position: absolute;
-    left: 5px;
-    font-weight: bold;
-  }
-
-  .playingIcon div{
-    background-color: rgb(236, 65, 65);
-    width: 4px;
-    margin: 0 1px;
-    height: 100%;
-  }
-
-  .playingIcon1 {
-    /* transform: translate3d(0,0,0); */
-    animation: playingIcon;
-    animation-duration: .5s;
-    animation-delay: 0;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-out;
-    animation-direction: alternate-reverse;
-  }
-
-  .playingIcon2 {
-    /* transform: translate3d(0,4px,0); */
-    animation: playingIcon;
-    animation-duration: .5s;
-    animation-delay: .2s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-out;
-    animation-direction: alternate-reverse;
-  }
-
-  .playingIcon3 {
-    /* transform: translate3d(0,8px,0); */
-    animation: playingIcon;
-    animation-duration: .5s;
-    animation-delay: .5s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-out;
-    animation-direction: alternate-reverse;
-  }
-
-  @keyframes playingIcon {
-    from{
-        transform: translate3d(0,0,0);
-    }
-    to{
-        transform: translate3d(0,80%,0);
-    }
-  }
-
-
-  .queue-song:nth-of-type(even) {
-    background-color: #f9f9f9;
-  }
-
-  .queue-song:not(.active-song):hover {
-    background-color: #f5f6fa;
-    color: #0097e6;
-  }
-
-  .queue-song:hover .queue-song-delete {
-    display: block;
-  }
-
-  .queue-song-name {
-    width: 40%;
-    margin-left: 25px;
-    margin-right: 20px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .queue-song-singer {
-    width: 30%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #2980b9;
-  }
-
-  .queue-song-duration {
-    width: 15%;
-  }
-
-  .queue-song-delete {
-    cursor: pointer;
-    margin-right:15px;
-    color: #3e3e3e;
-    display: none;
-  }
-
-  .active-song {
-    color: rgb(236, 65, 65);
-    position: relative;
-  }
+.active-song {
+  @apply text-orange-700;
+  position: relative;
+}
 </style>

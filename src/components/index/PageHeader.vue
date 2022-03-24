@@ -1,7 +1,6 @@
 <template>
-
-  <div class="header">
-    <h2 class="title">
+  <div class="header flex h-16 px-30">
+    <h2 class="text-2xl text-orange-700 top-2.5 mr-10">
       Nazo Music
     </h2>
     <div class="btns">
@@ -30,20 +29,6 @@ function go(destnation: any) {
 </script>
 
 <style lang="scss">
-  .header {
-    display: flex;
-    padding: 0 30px;
-    height: 60px;
-    top: 0;
-    left: 0;
-    right: 0;
-  }
-  .title {
-    color: brown;
-    margin-right: 30px;
-    top: 10px;
-  }
-
   .btns {
     margin-right: auto;
     display: flex;

@@ -1,21 +1,39 @@
 <template>
-  <div class="footer">
-    <div class="music-box">
-      <div class="img-wrap el-icon-arrow-up" @click="toSongDetail()" title="打开音乐详情页" onselectstart="return false">
-        <img :src="globalMusicInfo.imgUrl ? globalMusicInfo.imgUrl : defaultImg" alt="">
-      </div>
-      <div class="music-info" v-show="globalMusicInfo.songName">
-        <span class="music-name" :title="globalMusicInfo.songName">{{globalMusicInfo.songName}}</span>
-        <div class="music-singer">
-            <span v-for="(singer,i) in globalMusicInfo.artistInfo" :key="i+99">{{singer.name}} </span>
+  <div class="flex items-center shadow">
+    <div class="music-box flex box-border p-1 ">
+      <div class="img-wrap w-12 h-12 mr-3 cursor-pointer relative"
+        @click="toSongDetail()" title="打开音乐详情页" onselectstart="return false">
+        <img class="h-full rounded-xl" v-if="globalMusicInfo.imgUrl" :src="globalMusicInfo.imgUrl" alt="">
+        <div class="flex items-center justify-center w-12 h-12 text-white bg-orange-700 rounded-xl" v-if="!globalMusicInfo.imgUrl">
+          <div class=" w-10 h-10">
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="40px" height="40px" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M16 9h-3v5.5a2.5 2.5 0 0 1-2.5 2.5A2.5 2.5 0 0 1 8 14.5a2.5 2.5 0 0 1 2.5-2.5c.57 0 1.08.19 1.5.5V7h4v2m-4-7a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m0 2a8 8 0 0 0-8 8a8 8 0 0 0 8 8a8 8 0 0 0 8-8a8 8 0 0 0-8-8Z"/></svg>
+          </div>
         </div>
-        <span class="music-name" v-show="!globalMusicInfo.songName" style="line-height:50px">还没有播放音乐哦</span>
+      </div>
+      <div class="music-info" v-show="globalMusicInfo">
+        <span class="text-sm w-36 block overflow-x-hidden text-ellipsis whitespace-nowrap" :title="globalMusicInfo.songName" v-show="globalMusicUrl">{{globalMusicInfo.songName}}</span>
+        <div class="mt-2 text-xs w-36 inline-block overflow-x-hidden text-ellipsis whitespace-nowrap" v-show="globalMusicUrl">
+          <div class="inline-block" v-for="(singer,i) in globalMusicInfo.artistInfo" :key="i+99">
+            <span>{{singer.name}}</span>
+            <span v-show="globalMusicInfo.artistInfo.length != 1 && i!=globalMusicInfo.artistInfo.length-1">
+              &amp;&nbsp;
+            </span>
+          </div>
+        </div>
+        <span class="text-sm w-36 block overflow-x-hidden text-ellipsis whitespace-nowrap" v-show="!globalMusicUrl" style="line-height:48px">还没有播放音乐哦</span>
       </div>
     </div>
-    <PlayControl :globalMusicUrl="globalMusicUrl" @timeupdate="updateTime" @play="globalPlayStatus" @pause="globalPauseStatus" @next="next" @prev="prev" @end="next"></PlayControl>
+    <PlayControl :globalMusicUrl="globalMusicUrl" @timeupdate="updateTime" @play="globalPlayStatus" @autoplay="autoPlay" @pause="globalPauseStatus" @next="next" @prev="prev" @end="next"></PlayControl>
     <el-tooltip content="播放队列" placement="top" effect="light">
-      <div @click="toggleQueue()" ref="queue">
-        <span class="iconfont icon-yinleliebiao"></span>
+      <div class="flex justify-start items-center cursor-pointer" @click="toggleQueue()" ref="queue"
+        :class="{
+          'queue-icon queue-delete-before animate-[deleteAnimation_0.3s_reverse]':queueStyle=='delete',
+          'queue-icon queue-add-before animate-[addAnimation_0.3s_reverse]':queueStyle=='add',
+          'queue-icon':queueStyle=='normal'
+        }">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M15 6H3v2h12V6m0 4H3v2h12v-2M3 16h8v-2H3v2M17 6v8.18c-.31-.11-.65-.18-1-.18a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3V8h3V6h-5Z"/></svg>
+        </span>
         <span>{{musicQueue.length}}</span>
       </div>
     </el-tooltip>
@@ -46,6 +64,9 @@ function updateTime(e: any) { // TODO:
 function globalPlayStatus() {
   store.commit('changeMusicPausedStatus', false)
 }
+function autoPlay() {
+  store.commit('changeMusicPausedStatus', isMusicPaused.value)
+}
 function globalPauseStatus() {
   store.commit('changeMusicPausedStatus', true)
 }
@@ -73,7 +94,7 @@ function next() {
   } else {
     let nextIndex = (nowIndex.value + 1) % musicQueue.value.length
     // let nextId = this.musicQueue[nextIndex].id
-    play(musicQueue.value[nextIndex])
+    play(musicQueue.value[nextIndex], 'queue')
     store.commit('changeNowIndex', nextIndex)
     store.commit('changeMusicPausedStatus', false)
   }
@@ -86,7 +107,7 @@ function prev() { // TODO:
       showClose: true
     })
   } else if (musicQueue.value.length == 1) { // 若播放列表只有一首歌 则重头开始播放
-    play(musicQueue.value[0])
+    play(musicQueue.value[0], 'queue')
     // store.commit("changeNowIndex", 0)
     // store.commit("changeMusicUrl", "")
     // store.commit("changeMusicInfo", {})
@@ -106,7 +127,7 @@ function prev() { // TODO:
     }
     // let nextId = this.musicQueue[nextIndex].id
 
-    play(musicQueue.value[prevIndex])
+    play(musicQueue.value[prevIndex], 'queue')
     store.commit('changeNowIndex', prevIndex)
     store.commit('changeMusicPausedStatus', false)
 
@@ -125,34 +146,10 @@ function toggleQueue(){
 }
 </script>
 
-<style lang="scss">
-  .footer {
-    display: flex;
-    align-items: center;
-    background-color: #f1f3f4;
-    box-shadow: 0px -2px 2px rgba(0, 0, 0,.3);
-
-    position: relative; /* 防止被覆盖 */
-    /* #f1f3f4 */
-  }
-
+<style scoped>
   .footer audio {
     width: 100%;
     outline: none;
-  }
-
-  .music-box{
-    display: flex;
-    padding: 5px;
-    box-sizing: border-box;
-  }
-
-  .music-box .img-wrap {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    cursor: pointer;
-    position: relative;
   }
 
   .music-box .img-wrap::before{
@@ -171,9 +168,33 @@ function toggleQueue(){
   .music-box .img-wrap:hover::before{
     display: flex;
   }
+.queue-icon {
+  @apply mr-24 cursor-pointer
+}
 
-  .music-box .img-wrap img {
-    height: 100%;
-    border-radius: 5px;
+@keyframes addAnimation {
+  to {
+    color: rgb(194, 65, 12);
+    transform: scale(1.2);
   }
+}
+
+@keyframes deleteAnimation {
+  to {
+    color: rgb(34, 211, 238);
+    transform: scale(1.2);
+  }
+}
+
+.queue-icon-before {
+  @apply before:absolute before:-top-2 before:-left-5 before:font-bold before:scale-75
+}
+
+.queue-add-before {
+  @apply before:content-['+1'] queue-icon-before
+}
+.queue-delete-before {
+  @apply before:content-['-1'] queue-icon-before
+}
+
 </style>

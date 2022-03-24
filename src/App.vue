@@ -1,15 +1,16 @@
 <template>
   <el-container direction="vertical">
-    <PageHeader></PageHeader>
-    <MainPage class="mainpage"></MainPage>
+    <PageHeader class="relative items-center bg-red-300 px-8"></PageHeader>
+    <MainPage class="fixed top-16 bottom-14 w-full"></MainPage>
     <transition name="fade">
       <Queue v-show="showQueue"></Queue>
     </transition>
-    <PageFooter class="footer" @toggle="toggleQueue"></PageFooter>
+    <PageFooter class="fixed bottom-0 bg-slate-300 h-14 w-full" @toggle="toggleQueue"></PageFooter>
   </el-container>
 </template>
 
 <script setup lang="ts">
+import './style/tailwind.css'
 import PageHeader from './components/index/PageHeader.vue';
 import MainPage from './components/index/MainPage.vue';
 import PageFooter from './components/index/Footer.vue';
@@ -35,26 +36,5 @@ function toggleQueue() {
 html, body{
   margin:0;
   height:100%;
-}
-
-.header {
-  position: relative;
-  align-items: center;
-  background-color: rgb(240, 214, 214);
-  padding: 0 30px;
-}
-
-.mainpage{
-  position: fixed;
-  top: 60px;
-  bottom: 60px;
-  width: 100%;
-}
-.footer{
-  position: fixed;
-  bottom: 0;
-  background-color: #b3c0d1;
-  height: 60px;
-  width: 100%;
 }
 </style>

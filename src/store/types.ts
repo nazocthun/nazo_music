@@ -13,4 +13,5 @@ export interface RootState {
   queuePos: Object,
   queueStyle: string,
   musicChangedFlag: boolean,
+  playType: string
 }

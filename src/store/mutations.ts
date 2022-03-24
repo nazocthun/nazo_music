@@ -47,6 +47,10 @@ const mutations: MutationTree<RootState> = {
   },
   musicChanged(state: RootState) {
     state.musicChangedFlag = !state.musicChangedFlag
+  },
+  changePlayType(state: RootState, type: string) {
+    console.log(type)
+    state.playType = type
   }
 }
 

@@ -15,6 +15,7 @@ const store: StoreOptions<RootState> = {
     queuePos:{},
     queueStyle:'normal',
     musicChangedFlag: true,
+    playType: ''
   },
   mutations
 }

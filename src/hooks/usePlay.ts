@@ -2,15 +2,22 @@ import store from "@/store"
 import { ElMessage } from 'element-plus'
 import { ComputedRef, Ref, computed } from 'vue'
 import { playMusicAPI } from "../utils/api"
-import { musicInfoTypes } from '@/utils/interfaces'
+import { getMusicUrl } from "../api/getMusicUrl"
 
 export default function usePlay(location: string, isPaused: Ref<Boolean> | ComputedRef<Boolean>) {
   // 播放音乐
-  function play(row: any) {
+  function play(row: any, playType: string) {
+    console.log(row)
+    console.log(playType)
+    store.commit('changePlayType', playType)
     let params = {
       id: row.id,
       realIP: '116.25.146.177'
     }
+    getMusicUrl(row.id).then(res => {
+      console.log(res)
+    })
+
     playMusicAPI(params).then(res => {
       if (res.data.code === 200) {
         let url = res.data.data[0].url
@@ -29,11 +36,26 @@ export default function usePlay(location: string, isPaused: Ref<Boolean> | Compu
         }
         store.commit("changeMusicUrl", url)
         store.commit("changeMusicInfo", musicInfo)
-        store.commit("changeMusicPausedStatus", isPaused.value)
+        // if(playType === 'doubleclick' || playType === 'playbutton') {
+        //   store.commit("changeMusicPausedStatus", false)
+        // } else {
+        //   store.commit("changeMusicPausedStatus", isPaused.value)
+        // }
         store.commit("musicChanged")
+        if (location == 'queue') {
+          let ids = []
+          for (const item of musicQueue.value) {
+              ids.push(item.id)
+          }
+          store.commit("changeNowIndex",ids.indexOf(musicInfo.id))
+        }
       }
     })
     addToQueue(row, 'doubleclick')
+  }
+
+  function doubleClickPlay(row: any) {
+    play(row, 'doubleclick')
   }
   // 添加到播放列表
   const musicQueue = computed(() => store.state.musicQueue)
@@ -76,6 +98,7 @@ export default function usePlay(location: string, isPaused: Ref<Boolean> | Compu
 
   return {
     play,
+    doubleClickPlay,
     addToQueue,
   }
 }

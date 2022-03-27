@@ -17,33 +17,45 @@
         <div class="playall-button" @click="playAll"> 播放全部</div>
       </div>
     </div>
-    <div class="music-table">
-      <el-table :data="tableData" stripe @row-dblclick="doubleClickPlay">
-        <el-table-column type="index" width="50"></el-table-column>
-        <el-table-column prop="name" label="音乐标题" width=""></el-table-column>
-        <el-table-column prop="artists" label="歌手" width="">
-          <template #default="scope">
-            <div class="music-table-artist" v-for="(artist ,i) in scope.row.artists" :key="i">
-              <span class="music-table-artist-name" @click="toArtist(artist.id)">{{artist.name}}</span>
-              <span class="music-table-artist-hyphen" v-show="scope.row.artists.length != 1 && i!=scope.row.artists.length-1">
-                &amp;&nbsp;
-              </span>
-            </div>
-          </template>                                                                 
-        </el-table-column>                          
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tab-pane label="歌曲列表" name="music">
+        <div class="music-table">
+          <el-table :data="tableData" stripe @row-dblclick="doubleClickPlay">
+            <el-table-column type="index" width="50"></el-table-column>
+            <el-table-column prop="name" label="音乐标题" width=""></el-table-column>
+            <el-table-column prop="artists" label="歌手" width="">
+              <template #default="scope">
+                <div class="music-table-artist" v-for="(artist ,i) in scope.row.artists" :key="i">
+                  <span class="music-table-artist-name" @click="toArtist(artist.id)">{{artist.name}}</span>
+                  <span class="music-table-artist-hyphen" v-show="scope.row.artists.length != 1 && i!=scope.row.artists.length-1">
+                    &amp;&nbsp;
+                  </span>
+                </div>
+              </template>                                                                 
+            </el-table-column>                          
 
-        <el-table-column prop="album" label="专辑" >
-          <template #default="scope">
-            <span class="music-table-album-name" @click="toAlbum(scope.row.album.id)">{{scope.row.album.name}}</span>
-            <span class="music-table-add-queue" title="添加至待播列表" @click="addToQueue(scope.row, 'plus')">
-              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1.5em" height="1.5em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M2 16h8v-2H2m16 0v-4h-2v4h-4v2h4v4h2v-4h4v-2m-8-8H2v2h12m0 2H2v2h12v-2Z"/></svg>
-            </span>
-          </template>
-        </el-table-column>
+            <el-table-column prop="album" label="专辑" >
+              <template #default="scope">
+                <span class="music-table-album-name" @click="toAlbum(scope.row.album.id)">{{scope.row.album.name}}</span>
+                <span class="music-table-add-queue" title="添加至待播列表" @click="addToQueue(scope.row, 'plus')">
+                  <svg-icon iconName="add-queue"></svg-icon>
+                </span>
+              </template>
+            </el-table-column>
 
-        <el-table-column prop="time" label="时长" width="100"></el-table-column>                            
-      </el-table>
-    </div>
+            <el-table-column prop="time" label="时长" width="100"></el-table-column>                            
+          </el-table>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="专辑简介" name="descrption">
+        <span class="album-description-title">专辑介绍</span>
+        <p class="album-description-text" v-for="(item, index) in albumInfo.description" :key="index">{{item}}</p>
+      </el-tab-pane>
+      <el-tab-pane label="评论" name="comment">
+
+      </el-tab-pane>
+    </el-tabs>
+    
   </div>
 </template>
 
@@ -53,6 +65,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { getAlbumInfo } from '@/api/getAlbumInfo'
 import usePlay from '@/hooks/usePlay'
+import SvgIcon from './SvgIcon/SvgIcon.vue'
 
 const store = useStore()
 const loading = ref(true)
@@ -74,7 +87,7 @@ let params = {
 // 通过API获得Album数据
 const albumInfo = ref<Partial<Album>>({})
 const commentCount = ref()
-const artistName = ref()
+const artistName = ref<string>('')
 const albumDescList = ref()
 const tableData = ref<Array<Music>>()
 
@@ -91,6 +104,11 @@ function init() {
       loading.value = false
     }, 500);
   })
+}
+
+const activeName = ref('music')
+function handleClick(tab: any) {
+  console.log(tab)
 }
 
 // 播放音乐, 加入队列Hook
@@ -118,9 +136,6 @@ function toAlbum(id: any){
   console.log(id)
   router.push(`/album?id=${id}`)
 }
-
-const activeName = ref('first')
-
 
 // 监视路由变化
 watch(() => route, (newValue, _oldValue) => {
@@ -193,6 +208,14 @@ watch(() => route, (newValue, _oldValue) => {
   @apply cursor-pointer text-sky-600
 }
 .music-table-add-queue {
-  @apply flex float-right mr-4 cursor-pointer
+  @apply flex float-right mr-4 cursor-pointer w-6 h-6
+}
+
+.album-description-title {
+  @apply font-bold text-xl inline-block my-2.5 mx-0
+}
+
+.album-description-text {
+  @apply indent-8 my-4 mx-0 text-base
 }
 </style>

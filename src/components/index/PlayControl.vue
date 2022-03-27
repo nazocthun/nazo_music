@@ -1,5 +1,5 @@
 <template>
-  <div class="playcontrol w-160 min-w-50 h-full mx-auto my-0 p-2 box-border flex">
+  <div class="play-control">
     <audio :src="globalMusicUrl"
       controls 
       autoplay
@@ -10,42 +10,44 @@
       @ended="onEnded" 
       您的浏览器不支持audio标签>
     </audio>
-    <div class="functions flex-1 ">
-      <div class="control flex w-1/2 h-1/2 mx-auto my-0 align-center justify-evenly">
+    <div class="music-control">
+      <div class="music-control-buttons">
         <span class="prev" @click="prev">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M20 5v14l-7-7M6 5v14H4V5m9 0v14l-7-7"/></svg>
+          <svg-icon class="music-control-button" icon-name="prev-button"></svg-icon>
         </span>
         <span class="play" @click="changePlayControlStatus('play')" v-if="isPaused">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.14v14l11-7l-11-7Z"/></svg>
+          <svg-icon class="music-control-button" icon-name="play-button"></svg-icon>
         </span>
         <span class="pause" @click="changePlayControlStatus('pause')" v-if="!isPaused">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14Z"/></svg>
+          <svg-icon class="music-control-button" icon-name="pause-button"></svg-icon>
         </span>
         <span class="next" @click="next">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M4 5v14l7-7m7-7v14h2V5m-9 0v14l7-7"/></svg>
+          <svg-icon class="music-control-button" icon-name="next-button"></svg-icon>
         </span>
       </div>
-      <div class="progress flex items-center">
+      <div class="progress">
         <span>{{ playControlTimeFormat(currentTime) }}</span>
-        <div class="flex-1 mx-2 my-0">
+        <div class="progress-bar">
           <el-slider v-model="currentTime" :max="duration" :show-tooltip="false" @change="changeCurrentTime" @mousedown.native="isDraging = true" @mouseup.native="isDraging = false"></el-slider>
         </div>
         <span>{{ playControlTimeFormat(duration) }}</span>
       </div>
     </div>
-    <div class="w-1/4 min-w-25 ml-12">
-      <div class="h-1/2"></div>
-      <div class="flex items-center">
-        <span class="loud cursor-pointer" v-if="volume > 0.5" @click="volume = 0">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1.5em" height="1.5em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.84-5 6.7v2.07c4-.91 7-4.49 7-8.77c0-4.28-3-7.86-7-8.77M16.5 12c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4M3 9v6h4l5 5V4L7 9H3Z"/></svg>
-        </span>
-        <span class="quiet cursor-pointer" v-if="volume <= 0.5 && volume !== 0" @click="volume = 0">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1.5em" height="1.5em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M5 9v6h4l5 5V4L9 9m9.5 3c0-1.77-1-3.29-2.5-4.03V16c1.5-.71 2.5-2.24 2.5-4Z"/></svg>
-        </span>
-        <span class="mute cursor-pointer" v-if="!volume" @click="volume=(cacheVolume==0 ? 0.7 : cacheVolume)">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1.5em" height="1.5em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="m5.64 3.64l15.72 15.72l-1.41 1.42L16 16.83V20l-5-5H7V9h1.17L4.22 5.05l1.42-1.41M16 4v7.17l-3.59-3.59L16 4Z"/></svg>
-        </span>
-        <div class="flex-1 mx-2 my-0">
+    <div class="volume-cotrol">
+      <div class="volume-cotrol-top-empty"></div>
+      <div class="volume-button-bottom">
+        <div class="volume-buttons">
+          <span v-if="volume > 0.5" @click="volume = 0">
+            <svg-icon class="volume-button" iconName="volume-loud"></svg-icon>
+          </span>
+          <span v-if="volume <= 0.5 && volume !== 0" @click="volume = 0">
+            <svg-icon class="volume-button" iconName="volume-quiet"></svg-icon>
+          </span>
+          <span v-if="!volume" @click="volume=(cacheVolume==0 ? 0.7 : cacheVolume)">
+            <svg-icon class="volume-button" iconName="volume-mute"></svg-icon>
+          </span>
+        </div>
+        <div class="volume-slider">
           <el-slider v-model="volume" :max=1 :step=0.1 :show-tooltip="true" @input="changeVolume" @change="changeCacheVolume" :format-tooltip="volumeTooltip"></el-slider>
         </div>
       </div>
@@ -59,6 +61,7 @@ import { ElMessage } from 'element-plus'
 import { playControlTimeFormat } from '@/utils/utils';
 import store from '@/store';
 import usePlay from '@/hooks/usePlay';
+import SvgIcon from '../SvgIcon/SvgIcon.vue';
 
 const props = defineProps({
   globalMusicUrl: {
@@ -189,13 +192,51 @@ function next() {
 </script>
 
 <style>
-.control span {
-  @apply cursor-pointer rounded-full hover:bg-orange-200 w-8 h-8
-}
-.progress span {
-  @apply text-xs text-black
+.play-control {
+  @apply w-160 min-w-50 h-full mx-auto my-0 p-2 box-border flex
 }
 
+.music-control {
+  @apply flex-1
+}
+
+.music-control-buttons {
+  @apply flex w-1/2 h-1/2 mx-auto my-0 items-center justify-evenly
+}
+
+/* .music-control-button, .volume-button {
+  @apply w-full h-full
+} */
+
+.music-control-buttons span {
+  @apply cursor-pointer rounded-full hover:bg-orange-200 w-8 h-8
+}
+.progress {
+  @apply flex items-center
+}
+.progress span {
+  @apply text-xs text-black cursor-default
+}
+.progress-bar {
+  @apply flex-1 mx-2 my-0
+}
+
+.volume-cotrol {
+  @apply w-1/4 min-w-[150px] ml-12
+}
+.volume-cotrol-top-empty {
+  @apply h-1/2
+}
+.volume-button-bottom {
+  @apply flex items-center
+}
+.volume-buttons {
+  @apply cursor-pointer w-6 h-6 mr-[5px]
+}
+
+.volume-slider {
+  @apply flex-1 mx-2 my-0
+}
 .el-slider__bar {
   @apply bg-orange-700 !important
 }

@@ -40,7 +40,7 @@ declare interface Album {
     commentCount: number,
   }
   publishTime?: number | string,
-  description?: String,
+  description?: string | string[],
   music?: Music[],
 }
 declare interface ArtistIntroduction {

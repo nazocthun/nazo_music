@@ -13,16 +13,41 @@
         </div>
       </div>
     </div>
-
-
     <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tab-pane label="热门歌曲" name="hotMusic">
+        <el-table :data="musicData" stripe @row-dblclick="doubleClickPlay" style="width: 100%">
+          <el-table-column type="index" width="50"></el-table-column>
+          <el-table-column prop="name" label="歌曲名"></el-table-column>
+          <el-table-column prop="artists" label="歌手">
+            <template #default="scope">
+              <div class="inline-block" v-for="(artist, i) in scope.row.artists" :key="i">
+                <span class="cursor-pointer text-sky-600" @click="toArtist(artist.id)">{{artist.name}}</span>
+                <span class="text-gray-600" v-show="scope.row.artists.length != 1 && i!=scope.row.artists.length-1">
+                  &amp;&nbsp;
+                </span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="album" label="专辑">
+            <template #default="scope" class="flex ">
+              <div class="flex justify-start items-center">
+                <span class="flex-initial cursor-pointer text-sky-600 mr-auto" @click="toAlbum(scope.row.album.id)">{{scope.row.album.name}}</span>
+                <span class="flex float-right mr-4 cursor-pointer w-6 h-6" @click="addToQueue(scope.row, 'plus')">
+                  <svg-icon iconName="add-queue"></svg-icon>
+                </span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="time" label="时长" width="100"></el-table-column>
+        </el-table>
+      </el-tab-pane>
       <el-tab-pane label="专辑" name="album">
         <ul class="albums">
           <li class="album-item" v-for="(album, index1) in albumData" :key="index1">
             <div class="album-img-wrap" @click="toAlbum(album.id)">
               <img :src="album.picUrl" alt="">
               <div class="album-play-button" @click.stop="playAlbum(album.id)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 24 24" width="48" fill="currentColor" data-darkreader-inline-fill="" style="--darkreader-inline-fill:currentColor;"><path d="M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10-4.477 10-10 10zm4.126-8.254c.213-.153.397-.348.54-.575.606-.965.365-2.27-.54-2.917L10.07 5.356A1.887 1.887 0 0 0 8.972 5C7.883 5 7 5.941 7 7.102v5.796c0 .417.116.824.334 1.17.607.965 1.832 1.222 2.737.576l4.055-2.898zm-5.2-4.616l4.055 2.898-4.056 2.897V7.13z"></path></svg>
+                <svg-icon iconName="play-button-circle"></svg-icon>
               </div>
             </div>
             <div class="album-name" :title="album.name">{{ album.name }}</div>
@@ -36,10 +61,10 @@
             <div class="mv-img-wrap" @click="toMV(mv.id)">
               <img :src="mv.picUrl" alt="">
               <div class="mv-play-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 24 24" width="48" fill="currentColor" data-darkreader-inline-fill="" style="--darkreader-inline-fill:currentColor;"><path d="M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10-4.477 10-10 10zm4.126-8.254c.213-.153.397-.348.54-.575.606-.965.365-2.27-.54-2.917L10.07 5.356A1.887 1.887 0 0 0 8.972 5C7.883 5 7 5.941 7 7.102v5.796c0 .417.116.824.334 1.17.607.965 1.832 1.222 2.737.576l4.055-2.898zm-5.2-4.616l4.055 2.898-4.056 2.897V7.13z"></path></svg>
+                <svg-icon iconName="play-button-circle"></svg-icon>
               </div>
               <div class="mv-play-count">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="12" height="12" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M7 6v12l10-6z"/></svg>
+                <svg-icon iconName="play-button-small"></svg-icon>
                 {{ mv.playCount }}
               </div>
             </div>
@@ -52,11 +77,11 @@
       <el-tab-pane label="歌手详情" name="detail">
 
         <span class="detail-title">个人简介</span>
-        <p class="detail-words">{{artistIntroduction.briefDesc}}</p>
+        <p class="detail-text">{{artistIntroduction.briefDesc}}</p>
 
         <div v-for="(item, index) in artistIntroduction.introduction" :key="index">
             <span class="detail-title">{{item.title}}</span>
-            <p class="detail-words" v-for="(x,i) in item.txt" :key="i">{{x}}</p>                    
+            <p class="detail-text" v-for="(x,i) in item.txt" :key="i">{{x}}</p>                    
         </div>
 
       </el-tab-pane>
@@ -76,14 +101,16 @@
 </template>
 
 <script setup lang="ts">
-import { artistsAPI } from '@/utils/api'
 import { useRoute, useRouter } from 'vue-router'
 import { ref, watch, onMounted } from 'vue'
 import { getArtist, getArtistIntroduction, getArtistMV, getSimilarArtistInfo } from '@/api/getArtistInfo'
+import usePlay from '@/hooks/usePlay';
 
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
+
+const { play, doubleClickPlay, addToQueue } = usePlay('newMusic', ref(false))
 
 const artistId = ref()
 onMounted(() => {
@@ -97,11 +124,11 @@ onMounted(() => {
 })
 
 // 面板激活切换
-const activeName = ref('album')
+const activeName = ref('hotMusic')
 function handleClick(tab: any) {
   loading.value = true
   console.log(tab.props.label)
-  if(tab.props.label == '专辑') {
+  if(tab.props.label == '专辑' || tab.props.label == '热门歌曲') {
     initArtistInfo().then(() => {loading.value = false})
   } else if (tab.props.label == 'MV') {
     initMVData().then(() => {loading.value = false})
@@ -189,9 +216,9 @@ watch(route, (newVal: any, _oldVal: any) => {
     artistId.value = newVal.query.artistId
     params.id = artistId.value
     initArtistInfo()
-    initMVData()
+    // initMVData()
     setTimeout(() => {
-      activeName.value = 'album'
+      activeName.value = 'hotMusic'
       loading.value = false
     }, 0)
   }
@@ -271,17 +298,18 @@ watch(route, (newVal: any, _oldVal: any) => {
 .artist-mv {
   @apply grid grid-cols-4 gap-5
 }
-
+.mv-play-count svg {
+  @apply h-3 w-3
+}
 .mv-play-count {
-  @apply flex items-center absolute top-1 right-1 text-white text-xs;
-  text-shadow: 0 0 2px #000
+  @apply flex items-center absolute top-1 right-1 text-white text-xs cursor-default drop-shadow-[0_0_2px_rgba(0,0,0,1)];
 }
 
 .detail-title {
   @apply font-bold text-xl inline-block my-2.5 mx-0
 }
 
-.detail-words {
+.detail-text {
   @apply indent-8 my-4 mx-0 text-base
 }
 

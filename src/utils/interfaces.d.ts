@@ -1,13 +1,67 @@
-declare interface albumInfoTypes {
+declare interface Music {
+  id: number, // 歌曲id
+  name: string, // 歌曲名
+  picUrl?: string, // 专辑封面url
+  alias?: string, // 歌曲别名
+  artists: Artist[], // 艺人信息
+  album?: { // 专辑信息
+    id: number,
+    name: string,
+  }, 
+  duration?: number, // 歌曲时长
+  time?: string, // 歌曲时长格式化
+  mvId?: number, // mv id
+}
+
+declare interface Artist {
+  id: number, // 艺人id
+  name: string, // 艺人名
+  alias?: string, // 艺人别名
+  picUrl?: string, // 艺人图片
+}
+
+declare interface ArtistInfo {
+  name: string,
+  id: number,
+  picUrl: string,
+  briefDesc?: string,
+  albumSize: number,
+  musicSize: number,
+  hotMusic?: Music[],
+  hotAlbum?: Album[],
+}
+declare interface Album {
+  id: number,
   name: string,
   size: number,
   picUrl: string,
+  artist: Artist,
   info?: {
     commentCount: number,
   }
-  publishTime: number | string,
+  publishTime?: number | string,
   description?: String,
+  music?: Music[],
 }
+declare interface ArtistIntroduction {
+  briefDesc: string,
+  introduction: Array<{
+    title: string,
+    txt: Array<string>
+  }>
+}
+
+declare interface MV {
+  name: string,
+  id: number,
+  picUrl: string,
+  artist: Artist,
+  playCount: number | string,
+  publishTime?: string,
+  duration?: string,
+  time?: string,
+}
+
 
 declare interface albumTopInfoTypes {
   picUrl: string,
@@ -32,23 +86,6 @@ declare interface musicInfoTypes {
   artistInfo: Object,
   songName: string,
   id: number,
-  duration: number
+  duration: number,
 }
 
-declare interface Music {
-  id: number; // 歌曲id
-  name: string; // 歌曲名
-  picUrl?: string; // 专辑封面url
-  alias?: string; // 歌曲别名
-  artists: Artist[]; // 艺人信息
-  album?: Album;  // 专辑信息
-  duration?: number; // 歌曲时长
-  time?: string; // 歌曲时长格式化
-  mvId?: number; // mv id
-}
-
-declare type Artist = {
-  id: number; // 艺人id
-  name: string; //艺人名
-  picUrl?: string; //艺人图片
-}

@@ -1,39 +1,39 @@
 <template>
-  <div class="w-1/4 min-w-300 h-2/3 fixed right-2 bottom-14 border border-solid border-gray-500 rounded-t-md bg-white box-border text-sm shadow">
-    <div class="">
+  <div class="queue">
+    <div class="queue-tab">
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="播放列表" name="playList">
-            <div class="text-stone-400 pb-2 mx-2 my-3 border-b-2">
+            <div class="queue-header">
               <span>共{{musicQueue.length}}首</span>
-              <span class="text-orange-700 float-right cursor-pointer" @click="clearMusicQueue">清空列表</span>
+              <span class="queue-header-clear-button" @click="clearMusicQueue">清空列表</span>
             </div>
-            <ul class="h-96 relative">
+            <ul class="queue-list">
               <el-scrollbar style="height:100%">
-                <li class="queue-song flex items-center py-2 bg-white text-black cursor-pointer"
-                  v-for="item in musicQueue" 
-                  :key="item.id" @dblclick="doubleClickPlay(item)" 
-                  :class="{'active-song':item.id==globalMusicInfo.id}">
-                  <div class="w-3.5 h-3.5 overflow-hidden flex absolute left-[5px] " v-show="item.id==globalMusicInfo.id && !isMusicPaused">
+                <li class="queue-item"
+                  v-for="music in musicQueue"
+                  :key="music.id" @dblclick="doubleClickPlay(music)" 
+                  :class="{'active-item':music.id==globalMusicInfo.id}">
+                  <div class="playIconSet" v-show="music.id==globalMusicInfo.id && !isMusicPaused">
                     <div class="playIcon animate-playicon"></div>
                     <div class="playIcon animate-playicon animation-delay-200"></div>
                     <div class="playIcon animate-playicon animation-delay-500"></div>
                   </div>
-                  <span :class="{'playingIcon iconfont icon-zanting':isMusicPaused && item.id==globalMusicInfo.id}"></span>
-                  <span class="w-1/2 mx-6 overflow-hidden text-ellipsis whitespace-nowrap">{{item.songName}}</span>
+                  <span :class="{'':isMusicPaused && music.id==globalMusicInfo.id}"></span>
+                  <span class="queue-item-name">{{music.name}}</span>
 
-                  <div class="w-1/3 overflow-hidden text-ellipsis whitespace-nowrap text-sky-600">
-                    <span v-for="(singer,i) in item.artistInfo" :key="i" @click.stop="toArtist(singer.id)">{{singer.name}} </span>
+                  <div class="queue-item-artist">
+                    <span v-for="(artist ,i) in music.artists" :key="i" @click.stop="toArtist(artist.id)">{{artist.name}}&nbsp;</span>
                   </div>
 
-                  <span class="w-1/6">{{item.duration}}</span>
-                  <span class="queue-song-delete cursor-pointer mr-3 text-stone-400 hidden" @click="deleteQueue(item.id)">×</span>
+                  <span class="queue-item-time">{{music.time}}</span>
+                  <span class="queue-song-delete" @click="deleteQueue(music.id)">×</span>
                 </li>
               </el-scrollbar>
             </ul>
         </el-tab-pane>
         <el-tab-pane label="播放历史" name="history">播放历史</el-tab-pane>
       </el-tabs>
-      <span v-if="!musicQueue.length" class="absolute top-1/2 left-1/2 text-stone-400 -translate-x-1/2 -translate-y-1/2">队列是空的</span>
+      <span class="queue-empty-tip" v-if="!musicQueue.length">队列是空的</span>
     </div>
   </div>
 </template>
@@ -160,30 +160,76 @@ function toArtist(id: any){
 </script>
 
 <style>
+.queue {
+  @apply w-1/4 min-w-300 h-2/3 fixed right-2 bottom-14 border border-solid border-gray-500 rounded-t-md bg-white box-border text-sm shadow
+}
+
+.queue-tab {
+  @apply h-full
+}
+
+.queue-header {
+  @apply text-stone-400 pb-2 mx-2 my-3 border-b-2
+}
+
+.queue-header-clear-button {
+  @apply text-orange-700 float-right cursor-pointer
+}
+
+.queue-list {
+  @apply h-full relative
+}
 
 .el-tabs__header {
   @apply m-3
 }
 
+.playIconSet {
+  @apply w-3.5 h-3.5 overflow-hidden flex absolute left-[5px]
+}
 .playIcon {
   @apply bg-orange-700 w-1 mx-px h-full
 }
 
-.queue-song:nth-of-type(even) {
+.queue-item {
+  @apply flex items-center py-2 bg-white text-black cursor-pointer
+}
+
+.queue-item:nth-of-type(even) {
   background-color: #f9f9f9;
 }
 
-.queue-song:not(.active-song):hover {
+.queue-item:not(.active-item):hover {
   background-color: #f5f6fa;
   @apply text-sky-600
 }
 
-.queue-song:hover .queue-song-delete {
+.queue-item:hover .queue-song-delete {
   display: block;
 }
 
-.active-song {
+.active-item {
   @apply text-orange-700;
   position: relative;
+}
+
+.queue-item-name {
+  @apply w-1/2 mx-6 overflow-hidden text-ellipsis whitespace-nowrap
+}
+
+.queue-item-artist {
+  @apply w-1/3 overflow-hidden text-ellipsis whitespace-nowrap text-sky-600
+}
+
+.queue-item-time {
+  @apply w-1/6
+}
+
+.queue-song-delete {
+  @apply cursor-pointer mr-3 text-stone-400 hidden
+}
+
+.queue-empty-tip {
+  @apply absolute top-1/2 left-1/2 text-stone-400 -translate-x-1/2 -translate-y-1/2
 }
 </style>

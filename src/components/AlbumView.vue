@@ -1,45 +1,47 @@
 <template>
-  <div class="max-w-[1300px] my-0 mx-auto p-5" v-loading="loading">
+  <div class="album" v-loading="loading">
     <div class="flex">
-      <div class="w-25 h-25">
-        <img class="h-full w-full" :src="getCompressedImgUrl(albumInfo.picUrl, 500)" alt="">
+      <div class="album-image-wrapper">
+        <img class="album-image" :src="albumInfo.picUrl" alt="">
       </div>
-      <div class="px-5 py-0 flex-1">
-        <div class="text-2xl font-bold flex items-center">
-          <div class="text-orange-700 border-solid border border-orange-700 inline-block text-xl mr-2 rounded px-2 py-0 cursor-default">专辑</div>
+      <div class="album-top">
+        <div class="album-top-title">
+          <div class="album-top-title-label">专辑</div>
           {{albumInfo.name}}
         </div>
-        <div class="items-center text-sm">
-          <div class="playlist-user-name">歌手：{{artistName}}</div>
-          <div class="playlist-user-name">时间：{{albumInfo.publishTime}}</div>
-          <div class="playlist-user-name">共{{albumInfo.size}}首</div>
+        <div class="album-top-info">
+          <div class="album-top-info-detail">歌手：{{artistName}}</div>
+          <div class="album-top-info-detail">时间：{{albumInfo.publishTime}}</div>
+          <div class="album-top-info-detail">共{{albumInfo.size}}首</div>
         </div>
-        <div class="inline-block mr-2 rounded-2xl bg-orange-700 py-1 px-4 text-white cursor-pointer" @click="playAll"> 播放全部</div>
+        <div class="playall-button" @click="playAll"> 播放全部</div>
       </div>
     </div>
-    <div class="songs-table">
+    <div class="music-table">
       <el-table :data="tableData" stripe @row-dblclick="doubleClickPlay">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column prop="name" label="音乐标题" width=""></el-table-column>
-        <el-table-column prop="artistInfo" label="歌手" width="">
+        <el-table-column prop="artists" label="歌手" width="">
           <template #default="scope">
-            <div v-for="(singer,i) in scope.row.ar" :key="i" style="color:#2980b9;display:inline-block">
-              <span style="cursor:pointer;" @click="toArtist(singer.id)">{{singer.name}}</span>
-              <span style="color:#606266;" v-show="scope.row.ar.length != 1 && i!=scope.row.ar.length-1">
+            <div class="music-table-artist" v-for="(artist ,i) in scope.row.artists" :key="i">
+              <span class="music-table-artist-name" @click="toArtist(artist.id)">{{artist.name}}</span>
+              <span class="music-table-artist-hyphen" v-show="scope.row.artists.length != 1 && i!=scope.row.artists.length-1">
                 &amp;&nbsp;
               </span>
             </div>
           </template>                                                                 
         </el-table-column>                          
 
-        <el-table-column prop="al.name" label="专辑" >
+        <el-table-column prop="album" label="专辑" >
           <template #default="scope">
-            <span style="cursor:pointer;color:#2980b9;" @click="toAlbum(scope.row.al.id)">{{scope.row.al.name}}</span>
-            <span class="plus" title="添加至待播列表" @click="addToQueue(scope.row, 'plus')">+</span>
+            <span class="music-table-album-name" @click="toAlbum(scope.row.album.id)">{{scope.row.album.name}}</span>
+            <span class="music-table-add-queue" title="添加至待播列表" @click="addToQueue(scope.row, 'plus')">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1.5em" height="1.5em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M2 16h8v-2H2m16 0v-4h-2v4h-4v2h4v4h2v-4h4v-2m-8-8H2v2h12m0 2H2v2h12v-2Z"/></svg>
+            </span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="dt" label="时长" width="100"></el-table-column>                            
+        <el-table-column prop="time" label="时长" width="100"></el-table-column>                            
       </el-table>
     </div>
   </div>
@@ -49,22 +51,18 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { albumAPI } from '@/utils/api'
-import { durationTimeFormat, formatDate, getCompressedImgUrl } from '@/utils/utils'
+import { getAlbumInfo } from '@/api/getAlbumInfo'
 import usePlay from '@/hooks/usePlay'
 
 const store = useStore()
 const loading = ref(true)
 const musicQueue = computed(() => store.state.musicQueue)
 
-
-
 const albumId = ref()
 onMounted(() => {
   albumId.value = route.query.id
   params.id = albumId.value
-  getAlbumInfo(params)
-  // this.getComments(true)
+  init()
 })
 
 //API参数
@@ -74,25 +72,20 @@ let params = {
 }
 
 // 通过API获得Album数据
-const albumInfo = ref<albumInfoTypes>()
+const albumInfo = ref<Partial<Album>>({})
 const commentCount = ref()
 const artistName = ref()
 const albumDescList = ref()
-const tableData = ref([])
-function getAlbumInfo(params: Object) {
-  albumAPI(params).then( res => {
-    albumInfo.value = res.data.album
-    console.log(albumInfo.value)
-    commentCount.value = albumInfo.value.info.commentCount
-    artistName.value = res.data.album.artist.name
-    albumInfo.value.publishTime = formatDate(new Date(albumInfo.value.publishTime))
-    for(let item of res.data.songs){
-      let duration = item.dt
-      item.dt = durationTimeFormat(duration)
-    }
-    tableData.value = res.data.songs
-    let albumDesc = albumInfo.value.description
-    albumDescList.value = albumDesc.split(/[\n]/)
+const tableData = ref<Array<Music>>()
+
+function init() {
+  getAlbumInfo(params).then(res => {
+    console.log(res)
+    albumInfo.value = res
+    tableData.value = res.music
+    console.log(tableData.value)
+    artistName.value = res.artist.name
+
   }).then(() => {
     setTimeout(() => {
       loading.value = false
@@ -104,21 +97,14 @@ function getAlbumInfo(params: Object) {
 const { play, doubleClickPlay, addToQueue } = usePlay('album', ref(false))
 
 function playAll() { // TODO:
-  // let allSongs = tableData.value
-  // store.commit('clearMusicQueue')
-  // for (const item of allSongs) {
-  //   let obj = {
-  //     duration:item.dt,
-  //     id:item.id,
-  //     imgUrl:item.al.picUrl,
-  //     singer:item.ar[0].name,
-  //     songName:item.name
-  //   }
-  //   store.commit('changeMusicQueue',obj)
-  // }
-  // // 若第一首歌无版权无法播放，会出现bug，自动播放也是
-  // store.commit('changeNowIndex',0)
-  // play(allSongs[0])
+  let allMusic = tableData.value!
+  console.log(allMusic)
+  store.commit('clearMusicQueue')
+  for (const music of allMusic) {
+    store.commit('addMusicToQueue', music)
+  }
+  store.commit('changeNowIndex', 0)
+  play(allMusic[0], 'queue')
 }
 
 // 路由跳转
@@ -152,164 +138,61 @@ watch(() => route, (newValue, _oldValue) => {
 </script>
 
 <style scoped>
-.add-ball {
-        position: fixed;
-        color: rgb(236, 65, 65);
-        transition: top .5s ease-in,left .5s linear;
-    }
+.album {
+  @apply max-w-[1300px] my-0 mx-auto p-5
+}
 
-    ul {
-        list-style: none;
-    }
+.album-image-wrapper {
+  @apply w-25 h-25
+}
 
-    .playlist-user-info img {
-        margin: 10px 0;
-    }
+.album-image {
+  @apply w-full h-full
+}
 
-    .playlist-user-avatar img {
-        height: 30px;
-        width: 30px;
-        border-radius: 50%;
-    }
+.album-top {
+  @apply px-5 py-0 flex-1
+}
 
-    .playlist-user-name {
-      @apply mx-[10px] my-5
-    }
+.album-top-title {
+  @apply text-2xl font-bold flex items-center
+}
 
-    .playlist-tags {
-        margin: 10px 0;
-    }
+.album-top-title-label {
+  @apply text-orange-700 border-solid border border-orange-700 inline-block text-xl mr-2 rounded px-2 py-0 cursor-default
+}
 
-    .playlist-desc {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-    }
+.album-top-info {
+  @apply items-center text-sm
+}
 
-    .playlist-desc span:nth-of-type(2){
-        font-size: 14px;
-    }
+.album-top-info-detail {
+  @apply mx-[10px] my-5
+}
 
-    .playlist-tags .tags {
-        font-size: 14px;
-    }
+.playall-button {
+  @apply inline-block mr-2 rounded-2xl bg-orange-700 py-1 px-4 text-white cursor-pointer
+}
 
-    .playlist-tags .tags:not(:last-of-type)::after {
-        content: '/';
-        margin: 0 4px;
-    }
+.music-table {
+  @apply w-full
+}
 
-    .playlist-tabs-wrap {
-        margin-top: 20px;
-    }
+.music-table-artist{
+  @apply text-sky-600 inline-block
+}
 
-  .el-table td, .el-table th.is-leaf {
-    border-bottom: none;
-  }
+.music-table-artist-name {
+  @apply cursor-pointer
+}
+.music-table-artist-hyphen {
+  @apply text-stone-700
+}
 
-  .el-table::before {
-    opacity: 0;
-  }
-
-  .songs-table {
-    width: 100%;
-  }
-
-  .img-wrap {
-    width: 60px;
-    height: 60px;
-    position: relative;
-  }
-
-  .img-wrap img {
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-  }
-
-  .img-wrap p::before {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    width: 30px;
-    height: 30px;
-    background-color: rgba(255, 255, 255, .8);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #c0392b;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  
-  .comment-title {
-    margin-bottom: 20px;
-  }
-
-  .comment-wrap ul li {
-    display: flex;
-    margin: 10px 0 30px 0;
-  }
-
-  .comment-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-  }
-
-  .comment-info {
-    flex: 1;
-    font-size: 14px;
-    margin-left: 10px;
-  }
-
-  .comment {
-    margin-bottom: 10px;
-  }
-
-  .comment-user {
-    color: #517eaf;
-    margin-right: 10px;
-    cursor: pointer;
-  }
-
-  .comment-content {
-    display: inline;
-  }
-
-  .comment-time {
-    color: grey;
-    margin-right: 20px;
-    margin-top: 5px;
-  }
-
-  .comment-bottom {
-    display: flex;
-    align-items: center;
-    font-size: 14px!important;
-  }
-
-  .re-comment {
-    background-color: #f3f1f3;
-    padding: 5px 10px;
-    color: rgba(0,0,0,.6);
-    margin-bottom: 5px;
-  }
-
-  .dd {
-    line-height: 2.5rem;
-    text-indent: 2rem;
-    margin: 1rem 0;      
-  }
-
-  .tt {
-    font-weight: bold;
-    font-size: 20px;
-    display: inline-block;
-    margin: 10px 0;      
-  }
+.music-table-album-name {
+  @apply cursor-pointer text-sky-600
+}
+.music-table-add-queue {
+  @apply flex float-right mr-4 cursor-pointer
+}
 </style>

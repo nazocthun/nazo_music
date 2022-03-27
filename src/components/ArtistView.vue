@@ -1,15 +1,15 @@
 <template>
   <div class="artist" v-loading="loading">
-    <div class="artist-info">
+    <div class="artist-top-info">
       <div class="artist-img-wrap">
-        <img :src="getCompressedImgUrl(topInfo.picUrl, 500)" alt="">
+        <img :src="artistInfo.picUrl" alt="">
       </div>
-      <div class="artist-others">
-        <div class="artist-name">{{topInfo.name}}</div>
-        <div class="artsit-works">
-          <div class="artist-works-count">单曲数：{{topInfo.musicSize}}</div>
-          <div class="artist-works-count">专辑数：{{topInfo.albumSize}}</div>
-          <!-- <div class="artist-works-count">MV数：{{mvData.length}}</div> -->
+      <div class="artist-top-info-detail">
+        <div class="artist-name">{{artistInfo.name}}</div>
+        <div class="artist-works">
+          <div class="artist-works-count">单曲数：{{artistInfo.musicSize}}</div>
+          <div class="artist-works-count">专辑数：{{artistInfo.albumSize}}</div>
+          <div class="artist-works-count">MV数：{{mvData.length}}</div>
         </div>
       </div>
     </div>
@@ -18,47 +18,55 @@
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="专辑" name="album">
         <ul class="albums">
-          <li class="al-item" v-for="(item,index1) in albumData" :key="index1" @click="toAlbum(item.id)">
-              <div class="al-img-wrap">
-                  <p class="iconfont icon-play bofang"></p>
-                  <img :src="getCompressedImgUrl(item.picUrl, 500)" alt="">
+          <li class="album-item" v-for="(album, index1) in albumData" :key="index1">
+            <div class="album-img-wrap" @click="toAlbum(album.id)">
+              <img :src="album.picUrl" alt="">
+              <div class="album-play-button" @click.stop="playAlbum(album.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 24 24" width="48" fill="currentColor" data-darkreader-inline-fill="" style="--darkreader-inline-fill:currentColor;"><path d="M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10-4.477 10-10 10zm4.126-8.254c.213-.153.397-.348.54-.575.606-.965.365-2.27-.54-2.917L10.07 5.356A1.887 1.887 0 0 0 8.972 5C7.883 5 7 5.941 7 7.102v5.796c0 .417.116.824.334 1.17.607.965 1.832 1.222 2.737.576l4.055-2.898zm-5.2-4.616l4.055 2.898-4.056 2.897V7.13z"></path></svg>
               </div>
-              <div class="al-name" :title="item.name">{{item.name}}</div>
-              <div class="al-time">{{item.publishTime}}</div>
+            </div>
+            <div class="album-name" :title="album.name">{{ album.name }}</div>
+            <div class="album-time">{{ album.publishTime }}</div>
           </li>
         </ul>
       </el-tab-pane>
-      <!-- <el-tab-pane label="MV" name="mv">
-        <ul class="artist-mv">
-          <li class="mv-item" v-for="(item,index2) in mvData" :key="index2" @click="toMvDetail(item.id)">
-          <div class="al-img-wrap mv-img-wrap">
-              <p class="iconfont icon-play bofang"></p>
-              <img v-lazy="item.imgurl" alt="">
-              <p class="play-count iconfont icon-play">{{item.playCount}}</p>
+      <el-tab-pane label="MV" name="mv">
+        <div class="artist-mv">
+          <div class="mv-item" v-for="(mv, index) in mvData" :key="index">
+            <div class="mv-img-wrap" @click="toMV(mv.id)">
+              <img :src="mv.picUrl" alt="">
+              <div class="mv-play-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 24 24" width="48" fill="currentColor" data-darkreader-inline-fill="" style="--darkreader-inline-fill:currentColor;"><path d="M10 20C4.477 20 0 15.523 0 10S4.477 0 10 0s10 4.477 10 10-4.477 10-10 10zm4.126-8.254c.213-.153.397-.348.54-.575.606-.965.365-2.27-.54-2.917L10.07 5.356A1.887 1.887 0 0 0 8.972 5C7.883 5 7 5.941 7 7.102v5.796c0 .417.116.824.334 1.17.607.965 1.832 1.222 2.737.576l4.055-2.898zm-5.2-4.616l4.055 2.898-4.056 2.897V7.13z"></path></svg>
+              </div>
+              <div class="mv-play-count">
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="12" height="12" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M7 6v12l10-6z"/></svg>
+                {{ mv.playCount }}
+              </div>
             </div>
-            <div class="al-name" :title="item.name">{{item.name}}</div>                     
-          </li>
-          <span v-if="mvData.length==0">暂无MV</span>                    
-        </ul>
-      </el-tab-pane> -->
-      <!-- <el-tab-pane label="歌手详情" name="detail">
+            <div class="mv-name" :title="mv.name">{{ mv.name }}</div>  
+            <div class="mv-time">{{ mv.publishTime }}</div>
+          </div>
+          <span v-if="mvData.length == 0">暂无MV</span>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="歌手详情" name="detail">
 
         <span class="detail-title">个人简介</span>
-        <p class="detail-words" v-for="(y,index3) in description" :key="index3">{{y}}</p>
+        <p class="detail-words">{{artistIntroduction.briefDesc}}</p>
 
-        <div v-for="(item,index4) in introduction" :key="index4+999">
-            <span class="detail-title">{{item.ti}}</span>
-            <p class="detail-words" v-for="(x,i) in item.strList" :key="i">{{x}}</p>                    
+        <div v-for="(item, index) in artistIntroduction.introduction" :key="index">
+            <span class="detail-title">{{item.title}}</span>
+            <p class="detail-words" v-for="(x,i) in item.txt" :key="i">{{x}}</p>                    
         </div>
 
-      </el-tab-pane> -->
+      </el-tab-pane>
       <el-tab-pane label="相似歌手" name="similar">
-        <ul class="simi">
-          <li class="simi-item" v-for="(item,index) in similarArtists" :key="index" @click="toArtist(item.id)">
-            <div class="simi-img-wrap">
-              <img :src="getCompressedImgUrl(item.picUrl, 500)" alt="">
+        <ul class="similar">
+          <li class="similar-item" v-for="(artist, index) in similarArtists" :key="index">
+            <div class="similar-img-wrap" @click="toArtist(artist.id)">
+              <img :src="artist.picUrl" alt="">
             </div>
-            <div class="simi-name">{{item.name}}</div>
+            <div class="similar-name">{{artist.name}}</div>
           </li>
           <span v-if="similarArtists.length==0">暂无相似歌手</span>
         </ul>                
@@ -69,20 +77,23 @@
 
 <script setup lang="ts">
 import { artistsAPI } from '@/utils/api'
-import { getCompressedImgUrl } from '@/utils/utils'
 import { useRoute, useRouter } from 'vue-router'
-import { ref, watch, onBeforeMount } from 'vue'
-import { albumTopInfoTypes, similarArtistTypes } from '@/utils/interfaces';
+import { ref, watch, onMounted } from 'vue'
+import { getArtist, getArtistIntroduction, getArtistMV, getSimilarArtistInfo } from '@/api/getArtistInfo'
+
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 
 const artistId = ref()
-onBeforeMount(() => {
+onMounted(() => {
   artistId.value = route.query.artistId
   params.id = artistId.value
-  getAlbumData(params)
-  getMVData(params)
+  // getAlbumData(params)
+  // getMVData(params)
+  initArtistInfo()
+  initArtistIntroduction()
+  initMVData()
 })
 
 // 面板激活切换
@@ -90,14 +101,15 @@ const activeName = ref('album')
 function handleClick(tab: any) {
   loading.value = true
   console.log(tab.props.label)
-  if(tab.props.label == '相似歌手') {
-    getSimilarArtists()
+  if(tab.props.label == '专辑') {
+    initArtistInfo().then(() => {loading.value = false})
+  } else if (tab.props.label == 'MV') {
+    initMVData().then(() => {loading.value = false})
+  } else if (tab.props.label == '相似歌手') {
+    initSimilarArtists().then(() => {loading.value = false})
   } else if (tab.props.label == '歌手详情') {
-    getArtistInfo()    
+    initArtistIntroduction().then(() => {loading.value = false})
   }
-  setTimeout(() => {
-    loading.value = false
-  }, 1000);
 }
 
 //API参数
@@ -107,57 +119,54 @@ let params = {
   offset: 0
 }
 
-// 通过API获得TopInfo中专辑数量、音乐数量、艺人名称、艺人图片
-// 通过API获得AlbumData中数据
-const topInfo = ref({} as albumTopInfoTypes)
-const albumData = ref()
-function getAlbumData(params: Object) {
-  artistsAPI(params,'album').then( res => {
+// 通过API获得数据
+const musicData = ref<Array<Music>>()
+const albumData = ref<Array<Album>>()
+const artistInfo = ref<Partial<ArtistInfo>>({})
+async function initArtistInfo() {
+  await getArtist(params).then( res => {
     console.log(res)
-    topInfo.value = {
-      albumSize: res.data.artist.albumSize,
-      musicSize: res.data.artist.musicSize,
-      name: res.data.artist.name,
-      picUrl: res.data.artist.picUrl
-    }
-    albumData.value = res.data.hotAlbums
-  }).then(()=>{
+    artistInfo.value = res
+    albumData.value = res.hotAlbum
+    musicData.value = res.hotMusic
+  }).then(() => {
     loading.value = false
   })
 }
 
 // 获取艺人简介
-const description = ref([])
-const introduction = ref()
-function getArtistInfo(){
-  artistsAPI({id:artistId.value},'desc').then( res => {
-    // console.log(res)
-    description.value = res.data.briefDesc.split(/[\n]/)
-    introduction.value = res.data.introduction
-    let strList = []
-    for(let item of introduction.value){
-      strList = item.txt.split(/[\n]/)
-      item.strList = strList
-    }
-  })                            
+const artistIntroduction = ref<Partial<ArtistIntroduction>>({})
+async function initArtistIntroduction() {
+  await getArtistIntroduction(params).then(res => {
+    artistIntroduction.value.briefDesc = res.briefDesc
+    artistIntroduction.value.introduction = res.introduction
+  }).then(() => {
+    loading.value = false
+  })
 }
 
 // 获取相似艺人
-const similarArtists = ref([{} as similarArtistTypes])
-function getSimilarArtists(){
-  artistsAPI({id:artistId.value}, 'simi').then( res => {
-    // console.log(res)
-    similarArtists.value = res.data.artists
+const similarArtists = ref<Array<Artist>>([])
+async function initSimilarArtists(){
+  await getSimilarArtistInfo({ id: artistId.value }).then( res => {
+    similarArtists.value = res
+  }).then(() => {
+    loading.value = false
   })
 }
 
 // 获取MV数据
-const mvData = ref()
-function getMVData(params: Object) {
-  artistsAPI(params,'mv').then(res=>{
-    // console.log(res)
-    mvData.value = res.data.mvs
+const mvData = ref<Array<MV>>([])
+async function initMVData() {
+  await getArtistMV(params).then(res => {
+    mvData.value = res
+  }).then(() => {
+    loading.value = false
   })
+}
+
+function playAlbum(id: number) {
+  console.log("playAlbum", id)
 }
 
 // 路由跳转
@@ -169,13 +178,18 @@ function toArtist(id: number) {
   router.push(`/artist?artistId=${id}`)
 }
 
+function toMV(id: number) {
+  // router.push(`/mv?id=${id}`)
+  console.log("to mv: ", id)
+}
+
 // 路由监视，变更艺人时重制页面信息及选中标签
 watch(route, (newVal: any, _oldVal: any) => {
   if (newVal.query.artistId) {
     artistId.value = newVal.query.artistId
     params.id = artistId.value
-    getAlbumData(params)
-    getMVData(params)
+    initArtistInfo()
+    initMVData()
     setTimeout(() => {
       activeName.value = 'album'
       loading.value = false
@@ -186,173 +200,109 @@ watch(route, (newVal: any, _oldVal: any) => {
 </script>
 
 <style scoped>
-  .artist {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 20px;        
-  }
+.artist {
+  @apply max-w-[1300px] my-0 mx-auto p-5
+}
 
-  .artist :deep(.el-tabs__item){
-      font-size: 14px;
-  }
+.artist :deep(.el-tabs__item){
+  @apply text-sm
+}
 
-  .artist :deep(.el-loading-spinner) {
-    top: 15%;
-  }
+.artist :deep(.el-loading-spinner) {
+  @apply top-[15%]
+}
 
-  .artist-info {
-      display: flex;
-      font-size: 14px;
-      margin-bottom: 20px;
-  }
+.artist-top-info {
+  @apply flex text-sm mb-5
+}
 
-  .artist-img-wrap {
-      width: 200px;
-      /* height: 200px; */
-      margin-right: 50px;
-  }
+.artist-img-wrap {
+  @apply w-[200px] mr-[50px] 
+}
 
-  .artist-img-wrap img {
-      width: 100%;
-      height: 100%;
-  }
+.artist-img-wrap img {
+  @apply w-full h-full rounded-xl
+}
 
-  .artist-name {
-      font-weight: bold;
-      font-size: 22px;
-  }
+.artist-name {
+  @apply text-2xl font-bold
+}
 
-  .artsit-works {
-      margin-top: 20px;
-      display: flex;
-  }
+.artist-works {
+  @apply mt-5 flex
+}
 
-  .artist-works-count:nth-of-type(2) {
-      margin: 0 20px;
-  }
+.artist-works-count:nth-of-type(2) {
+  @apply my-0 mx-5
+}
 
-  /* tabs部分 */
-  /* 专辑 */
-  .albums {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 20px;
-      align-items: center;
-  }
+.albums {
+  @apply grid grid-cols-5 gap-5 items-center
+}
 
-  .al-item {
-      font-size: 14px;
-      width: 300px;
-  }
+.album-item, .mv-item {
+  @apply text-sm w-full
+}
 
-  .al-img-wrap {
-      width: 100%;
-      position: relative;
-  }
+.album-img-wrap, .mv-img-wrap {
+  @apply w-full relative
+}
 
-  .al-img-wrap img {
-      width: 100%;
-      border-radius: 10px;
-  }
+.album-img-wrap img, .mv-img-wrap img {
+  @apply w-full rounded-xl
+}
 
-  .al-img-wrap .bofang::before {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      width: 50px;
-      height: 50px;
-      background-color: rgba(255, 255, 255, .8);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #c0392b;
-      font-size: 20px;
-      cursor: pointer;
-      opacity: 0;
-      transition: .5s;
-  }
+.album-play-button, .mv-play-button {
+  @apply absolute justify-center opacity-0 items-center cursor-pointer w-12 h-12 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 bg-white/80 text-orange-700 rounded-full duration-500
+}
 
-  .al-img-wrap:hover .bofang::before{
-      opacity: 1;
-  }
+.album-img-wrap:hover .album-play-button, .mv-img-wrap:hover .mv-play-button {
+  @apply opacity-100
+}
 
-  .al-name {
-      margin: 5px 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-  }
+.album-name, .mv-name{
+  @apply my-1.5 overflow-hidden text-ellipsis whitespace-nowrap text-sm
+}
 
-  .al-time {
-      color: grey;
-  }
+.album-time, .mv-time {
+  @apply text-xs
+}
 
-  /* MV */
-  .artist-mv {
-      display: grid;
-      gap: 20px;
-      grid-template-columns: repeat(4,1fr);
-  }
+.artist-mv {
+  @apply grid grid-cols-4 gap-5
+}
 
-  .mv-item {
-      width: 300px;        
-  }
+.mv-play-count {
+  @apply flex items-center absolute top-1 right-1 text-white text-xs;
+  text-shadow: 0 0 2px #000
+}
 
-  .play-count{
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      color: #fff;
-      text-shadow: 0 0 2px rgb(0, 0, 0);
-  }  
-  
-  /* 歌手详情 */
-  .detail-title {
-      font-weight: bold;
-      font-size: 20px;
-      display: inline-block;
-      margin: 10px 0;
-  }
+.detail-title {
+  @apply font-bold text-xl inline-block my-2.5 mx-0
+}
 
-  .detail-words {
-      line-height: 2.5rem;
-      text-indent: 2rem;
-      margin: 1rem 0;
-      /* white-space: pre-line;  */
-  }
+.detail-words {
+  @apply indent-8 my-4 mx-0 text-base
+}
 
   /* 相似歌手 */
-  .simi {
-      display: grid;
-      grid-template-columns: repeat(5,1fr);
-      gap: 20px;
-  }
+.similar {
+  @apply grid grid-cols-5 gap-5
+}
 
-  .simi-item {
-      width: 80%;
-  }
+.similar-item {
+  @apply w-full
+}
 
-  .simi-img-wrap {
-      width: 100%;
-      height: 0;
-      padding-bottom: 100%;
-      position: relative;
-      cursor: pointer;
-  }
+.similar-img-wrap {
+  @apply w-full cursor-pointer relative
+}
 
-  .simi-img-wrap img {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 10px;
-  }
+.similar-img-wrap img {
+  @apply w-full rounded-xl
+}
 
-  .simi-name {
-      font-size: 14px;
-      color: grey;
-      text-align: center;
-      margin: 10px 0;        
-  }
+.similar-name {
+  @apply text-sm text-center my-2.5 mx-0 text-stone-800
+}
 </style>

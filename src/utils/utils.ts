@@ -15,13 +15,27 @@ export function playControlTimeFormat(duration: number | undefined): string {
   }
 }
 
-export  function formatDate(now: Date): string { 
-  var year = now.getFullYear()
-  var month = (now.getMonth() + 1).toString().padStart(2, '0')
-  var date = now.getDate().toString().padStart(2, '0')
-  return `${year}-${month}-${date}`
+export  function formatDate(date: Date): string { 
+  var year = date.getFullYear()
+  var month = (date.getMonth() + 1).toString().padStart(2, '0')
+  var day = date.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
-export function getCompressedImgUrl(url: string, size: number): string {
-  return `${url}?param=${size}y${size}`
+export function getCompressedImgUrl(url: string, size: number, type = 'square'): string {
+  if (type === 'landscape') {
+    return `${url}?param=${size}y${Math.floor(size/16*9)}`
+  } else {
+    return `${url}?param=${size}y${size}`
+  }
+}
+
+export function playCountMinimize(playCount: number): string {
+  if (playCount < 10000) {
+    return playCount.toString()
+  } else if (playCount < 100000000) {
+    return (playCount / 10000).toFixed(1) + '万'
+  } else {
+    return (playCount / 100000000).toFixed(1) + '亿'
+  }
 }

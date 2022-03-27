@@ -30,7 +30,7 @@
 
 </script>
 
-<style lang="scss">
+<style>
   .sidebar {
     margin: 0;
     padding: 0;
@@ -75,8 +75,9 @@
   }
 
   .mainpage{
+    @apply bg-slate-100;
     display: flex;
-    background-color: rgba(123, 94, 94, 0.824);
+
   }
   .content{
     margin: 0px;

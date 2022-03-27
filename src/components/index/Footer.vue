@@ -3,19 +3,19 @@
     <div class="music-box flex box-border p-1 ">
       <div class="img-wrap w-12 h-12 mr-3 cursor-pointer relative"
         @click="toSongDetail()" title="打开音乐详情页" onselectstart="return false">
-        <img class="h-full rounded-xl" v-if="globalMusicInfo.imgUrl" :src="globalMusicInfo.imgUrl" alt="">
-        <div class="flex items-center justify-center w-12 h-12 text-white bg-orange-700 rounded-xl" v-if="!globalMusicInfo.imgUrl">
+        <img class="h-full rounded-xl" v-if="globalMusicInfo.picUrl" :src="globalMusicInfo.picUrl" alt="">
+        <div class="flex items-center justify-center w-12 h-12 text-white bg-orange-700 rounded-xl" v-if="!globalMusicInfo.picUrl">
           <div class=" w-10 h-10">
             <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="40px" height="40px" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M16 9h-3v5.5a2.5 2.5 0 0 1-2.5 2.5A2.5 2.5 0 0 1 8 14.5a2.5 2.5 0 0 1 2.5-2.5c.57 0 1.08.19 1.5.5V7h4v2m-4-7a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m0 2a8 8 0 0 0-8 8a8 8 0 0 0 8 8a8 8 0 0 0 8-8a8 8 0 0 0-8-8Z"/></svg>
           </div>
         </div>
       </div>
       <div class="music-info" v-show="globalMusicInfo">
-        <span class="text-sm w-36 block overflow-x-hidden text-ellipsis whitespace-nowrap" :title="globalMusicInfo.songName" v-show="globalMusicUrl">{{globalMusicInfo.songName}}</span>
+        <span class="text-sm w-36 block overflow-x-hidden text-ellipsis whitespace-nowrap" :title="globalMusicInfo.name" v-show="globalMusicUrl">{{globalMusicInfo.name}}</span>
         <div class="mt-2 text-xs w-36 inline-block overflow-x-hidden text-ellipsis whitespace-nowrap" v-show="globalMusicUrl">
-          <div class="inline-block" v-for="(singer,i) in globalMusicInfo.artistInfo" :key="i+99">
-            <span>{{singer.name}}</span>
-            <span v-show="globalMusicInfo.artistInfo.length != 1 && i!=globalMusicInfo.artistInfo.length-1">
+          <div class="inline-block" v-for="(artist, i) in globalMusicInfo.artists" :key="i+99">
+            <span>{{artist.name}}</span>
+            <span v-show="globalMusicInfo.artists.length != 1 && i!=globalMusicInfo.artists.length-1">
               &amp;&nbsp;
             </span>
           </div>
@@ -74,6 +74,7 @@ function globalPauseStatus() {
 const { play } = usePlay('queue', isMusicPaused)
 
 function next() {
+  store.commit('addMusicToHistory', globalMusicInfo.value)
   if (musicQueue.value.length == 0) {
     ElMessage({
       type: 'warning',
@@ -99,7 +100,8 @@ function next() {
     store.commit('changeMusicPausedStatus', false)
   }
 }
-function prev() { // TODO: 
+function prev() { // TODO:
+  store.commit('addMusicToHistory', globalMusicInfo.value)
   if (musicQueue.value.length == 0) {
     ElMessage({
       type: 'warning',

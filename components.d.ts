@@ -21,6 +21,7 @@ declare module 'vue' {
     MainPage: typeof import('./src/components/index/MainPage.vue')['default']
     PageHeader: typeof import('./src/components/index/PageHeader.vue')['default']
     PlayControl: typeof import('./src/components/index/PlayControl.vue')['default']
+    Playlist: typeof import('./src/components/Playlist.vue')['default']
     Queue: typeof import('./src/components/Queue.vue')['default']
   }
 }

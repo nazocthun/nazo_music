@@ -10,6 +10,7 @@ const store: StoreOptions<RootState> = {
     globalCurrentTime:0,
     isMusicPaused:true,
     musicQueue:[],
+    musicHistoryQueue: [],
     nowIndex:0,
     deleteToNext:false,
     queuePos:{},

@@ -8,6 +8,7 @@ export interface RootState {
   globalCurrentTime: Number,
   isMusicPaused: boolean,
   musicQueue: Array<musicQueueInfo>,
+  musicHistoryQueue: Array<musicQueueInfo>,
   nowIndex: Number,
   deleteToNext: boolean,
   queuePos: Object,

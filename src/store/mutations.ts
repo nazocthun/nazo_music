@@ -1,3 +1,4 @@
+import { id } from "element-plus/lib/locale"
 import { MutationTree } from "node_modules/vuex/types"
 import { RootState } from "./types"
 
@@ -14,13 +15,20 @@ const mutations: MutationTree<RootState> = {
   changeMusicPausedStatus(state: RootState, status: boolean){
     state.isMusicPaused = status
   },
-  changeMusicQueue(state: RootState, obj: any){
+  addMusicToQueue(state: RootState, music: Music){
     let ids = []
     for (const item of state.musicQueue) {
       ids.push(item.id)
     }
-    if(!ids.includes(obj.id))
-      state.musicQueue.push(obj)
+    if(!ids.includes(music.id))
+      state.musicQueue.push(music)
+  },
+  addMusicToHistory(state: RootState, music: Music){
+    let ids = []
+    ids.push(music)
+    for (const item of state.musicHistoryQueue) {
+      ids.push(item.id)
+    }
   },
   deleteMusic(state: RootState, id: number){
     let queue = state.musicQueue

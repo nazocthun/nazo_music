@@ -14,41 +14,23 @@ export default function usePlay(location: string, isPaused: Ref<Boolean> | Compu
       id: row.id,
       realIP: '116.25.146.177'
     }
-    getMusicUrl(row.id).then(res => {
-      console.log(res)
-    })
-
-    playMusicAPI(params).then(res => {
-      if (res.data.code === 200) {
-        let url = res.data.data[0].url
-        let musicInfo = {} as musicInfoTypes
-        musicInfo.id = row.id
-        musicInfo.imgUrl = row.imgUrl
-        musicInfo.artistInfo = row.artistInfo
-        musicInfo.songName = row.name
-        musicInfo.duration = row.duration
-        if (location == 'album') {
-          musicInfo.imgUrl = row.al.picUrl
-          musicInfo.artistInfo = row.ar
-          musicInfo.duration = row.dt
-        } else if (location == 'queue') {
-          musicInfo.songName = row.songName
+    let musicInfo: Music = row
+    getMusicUrl(params).then(res => {
+      var musicUrl = res.musicUrl
+      store.commit("changeMusicUrl", musicUrl)
+      store.commit("changeMusicInfo", musicInfo)
+      if(playType === 'doubleclick' || playType === 'playbutton') {
+        store.commit("changeMusicPausedStatus", false)
+      } else {
+        store.commit("changeMusicPausedStatus", isPaused.value)
+      }
+      store.commit("musicChanged")
+      if (location == 'queue') {
+        let ids = []
+        for (const item of musicQueue.value) {
+          ids.push(item.id)
         }
-        store.commit("changeMusicUrl", url)
-        store.commit("changeMusicInfo", musicInfo)
-        // if(playType === 'doubleclick' || playType === 'playbutton') {
-        //   store.commit("changeMusicPausedStatus", false)
-        // } else {
-        //   store.commit("changeMusicPausedStatus", isPaused.value)
-        // }
-        store.commit("musicChanged")
-        if (location == 'queue') {
-          let ids = []
-          for (const item of musicQueue.value) {
-              ids.push(item.id)
-          }
-          store.commit("changeNowIndex",ids.indexOf(musicInfo.id))
-        }
+        store.commit("changeNowIndex",ids.indexOf(musicInfo.id))
       }
     })
     addToQueue(row, 'doubleclick')
@@ -60,30 +42,19 @@ export default function usePlay(location: string, isPaused: Ref<Boolean> | Compu
   // 添加到播放列表
   const musicQueue = computed(() => store.state.musicQueue)
   function addToQueue(row: any, addType: string) {
-    let obj = {} as musicInfoTypes
-    obj.id = row.id
-    obj.imgUrl = row.imgUrl
-    obj.duration = row.duration,
-    obj.artistInfo = row.artistInfo,
-    obj.songName = row.name
-    if (location == 'album') {
-      obj.imgUrl = row.al.picUrl
-      obj.artistInfo = row.ar
-      obj.duration = row.dt
-      obj.songName = row.name
-    }
+    let music: Music = row
     let ids = []
     for (const item of musicQueue.value) {
       ids.push(item.id)
     }
-    if(ids.indexOf(obj.id) == -1){
+    if(ids.indexOf(music.id) == -1) {
       // this.beginAnimation(e.x,e.y)
       setTimeout(() => {
-        store.commit('changeQueueStyle','add')
-        store.commit('changeMusicQueue',obj)
+        store.commit('changeQueueStyle', 'add')
+        store.commit('addMusicToQueue', music)
       }, 500)
       setTimeout(() => {
-        store.commit('changeQueueStyle','normal')
+        store.commit('changeQueueStyle', 'normal')
       }, 1000)
     } else {
       if (addType != 'doubleclick') {

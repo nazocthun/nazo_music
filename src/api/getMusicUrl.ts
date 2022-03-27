@@ -5,8 +5,8 @@ const REQUEST_URL = {
   songUrl: '/song/url',
 }
 
-export const getMusicUrl = (id: number) => {
-  return getRequest(REQUEST_URL.songUrl, { id }).then(convertMusicUrl)
+export const getMusicUrl = (params = {}) => {
+  return getRequest(REQUEST_URL.songUrl, params).then(convertMusicUrl)
 }
 
 export const convertMusicUrl = async (res: AxiosResponse<any> ): Promise<musicUrl> => {
